@@ -177,7 +177,7 @@ const Share = () => {
               <Button
                 onClick={() => {
                   const link = document.createElement('a');
-                  link.href = qr CodeUrl;
+                  link.href = qrCodeUrl;
                   link.download = `qr-code-${chatbot.name}.png`;
                   link.click();
                 }}
