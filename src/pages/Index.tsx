@@ -4,11 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Bot, Zap, Globe } from 'lucide-react';
+import { Bot, Zap, Globe, ArrowLeft } from 'lucide-react';
 
 const Index = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [currentView, setCurrentView] = useState<'login' | 'register'>('login');
 
   const handleGoogleLogin = () => {
     setIsLoading(true);
@@ -24,12 +25,19 @@ const Index = () => {
     }, 1500);
   };
 
+  const handleEmailRegister = () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      navigate('/dashboard');
+    }, 1500);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-nylo-dark via-nylo-darker to-nylo-card">
       {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-full blur-3xl floating-animation"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-blue-500/20 to-primary/20 rounded-full blur-3xl floating-animation" style={{animationDelay: '-3s'}}></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-blue-500/20 to-primary/20 rounded-full blur-3xl"></div>
       </div>
 
       <div className="container mx-auto px-4 py-8 min-h-screen flex items-center justify-center relative z-10">
@@ -51,9 +59,27 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Card de Login */}
+          {/* Card de Login/Cadastro */}
           <Card className="card-dark border-0 nylo-shadow">
             <CardContent className="p-8 space-y-6">
+              {/* Header do formulário */}
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold text-white">
+                  {currentView === 'login' ? 'Entrar' : 'Criar Conta'}
+                </h2>
+                {currentView === 'register' && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setCurrentView('login')}
+                    className="text-gray-400 hover:text-white"
+                  >
+                    <ArrowLeft className="w-4 h-4 mr-1" />
+                    Voltar
+                  </Button>
+                )}
+              </div>
+
               <div className="space-y-4">
                 <Button 
                   onClick={handleGoogleLogin}
@@ -79,23 +105,42 @@ const Index = () => {
                 </div>
 
                 <div className="space-y-3">
+                  {currentView === 'register' && (
+                    <Input 
+                      type="text" 
+                      placeholder="Seu nome completo"
+                      className="h-12 glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary focus:ring-primary/20"
+                    />
+                  )}
                   <Input 
                     type="email" 
                     placeholder="seu@email.com"
                     className="h-12 glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary focus:ring-primary/20"
                   />
+                  <Input 
+                    type="password" 
+                    placeholder="Sua senha"
+                    className="h-12 glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary focus:ring-primary/20"
+                  />
+                  {currentView === 'register' && (
+                    <Input 
+                      type="password" 
+                      placeholder="Confirme sua senha"
+                      className="h-12 glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary focus:ring-primary/20"
+                    />
+                  )}
                   <Button 
-                    onClick={handleEmailLogin}
+                    onClick={currentView === 'login' ? handleEmailLogin : handleEmailRegister}
                     disabled={isLoading}
                     className="w-full h-12 gradient-blue hover:opacity-90 transition-all duration-300 nylo-shadow text-white font-medium"
                   >
                     {isLoading ? (
                       <div className="flex items-center gap-2">
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                        Entrando...
+                        {currentView === 'login' ? 'Entrando...' : 'Criando conta...'}
                       </div>
                     ) : (
-                      'Entrar com Email'
+                      currentView === 'login' ? 'Entrar com Email' : 'Criar Conta'
                     )}
                   </Button>
                 </div>
@@ -103,7 +148,27 @@ const Index = () => {
 
               <div className="text-center space-y-3">
                 <p className="text-sm text-gray-400">
-                  Não tem conta? <span className="text-primary cursor-pointer hover:underline font-medium">Criar gratuitamente</span>
+                  {currentView === 'login' ? (
+                    <>
+                      Não tem conta?{' '}
+                      <span 
+                        className="text-primary cursor-pointer hover:underline font-medium"
+                        onClick={() => setCurrentView('register')}
+                      >
+                        Criar gratuitamente
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      Já tem conta?{' '}
+                      <span 
+                        className="text-primary cursor-pointer hover:underline font-medium"
+                        onClick={() => setCurrentView('login')}
+                      >
+                        Fazer login
+                      </span>
+                    </>
+                  )}
                 </p>
                 <Button 
                   variant="ghost" 

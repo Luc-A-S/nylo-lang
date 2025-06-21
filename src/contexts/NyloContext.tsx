@@ -9,6 +9,13 @@ export interface ChatBot {
   isOnline: boolean;
   lastUpdated: Date;
   publicLink?: string;
+  accessCount?: number;
+  todayAccessCount?: number;
+  accessHistory?: Array<{
+    date: Date;
+    count: number;
+    uniqueVisitors: number;
+  }>;
   settings: {
     brandingColor: string;
     businessName: string;
@@ -23,6 +30,7 @@ interface NyloContextType {
   deleteChatbot: (id: string) => void;
   getChatbot: (id: string) => ChatBot | undefined;
   generatePublicLink: (id: string) => string;
+  incrementAccessCount: (id: string) => void;
 }
 
 const NyloContext = createContext<NyloContextType | undefined>(undefined);
@@ -83,6 +91,13 @@ export const NyloProvider = ({ children }: { children: ReactNode }) => {
       sourceCode: defaultTemplate,
       isOnline: true,
       lastUpdated: new Date(),
+      accessCount: 127,
+      todayAccessCount: 8,
+      accessHistory: [
+        { date: new Date(Date.now() - 86400000), count: 15, uniqueVisitors: 12 },
+        { date: new Date(Date.now() - 172800000), count: 23, uniqueVisitors: 18 },
+        { date: new Date(Date.now() - 259200000), count: 31, uniqueVisitors: 24 },
+      ],
       settings: {
         brandingColor: '#356CFF',
         businessName: 'Minha Empresa',
@@ -99,6 +114,9 @@ export const NyloProvider = ({ children }: { children: ReactNode }) => {
       sourceCode: defaultTemplate,
       isOnline: false,
       lastUpdated: new Date(),
+      accessCount: 0,
+      todayAccessCount: 0,
+      accessHistory: [],
       settings: {
         brandingColor: '#356CFF',
         businessName: name,
@@ -132,6 +150,19 @@ export const NyloProvider = ({ children }: { children: ReactNode }) => {
     return link;
   };
 
+  const incrementAccessCount = (id: string) => {
+    setChatbots(prev => prev.map(bot => 
+      bot.id === id 
+        ? { 
+            ...bot, 
+            accessCount: (bot.accessCount || 0) + 1,
+            todayAccessCount: (bot.todayAccessCount || 0) + 1,
+            lastUpdated: new Date()
+          }
+        : bot
+    ));
+  };
+
   return (
     <NyloContext.Provider value={{
       chatbots,
@@ -139,7 +170,8 @@ export const NyloProvider = ({ children }: { children: ReactNode }) => {
       updateChatbot,
       deleteChatbot,
       getChatbot,
-      generatePublicLink
+      generatePublicLink,
+      incrementAccessCount
     }}>
       {children}
     </NyloContext.Provider>

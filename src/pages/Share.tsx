@@ -5,7 +5,7 @@ import { useNylo } from '@/contexts/NyloContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Copy, ExternalLink, Download, Eye } from 'lucide-react';
+import { ArrowLeft, Copy, ExternalLink, Download, Eye, BarChart3, Users, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Share = () => {
@@ -89,6 +89,53 @@ const Share = () => {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8 max-w-4xl relative z-10">
+        {/* Estatísticas Principais */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <Card className="card-dark border-0 nylo-shadow">
+            <CardContent className="p-6 text-center">
+              <div className="flex items-center justify-center mb-2">
+                <BarChart3 className="w-8 h-8 text-primary" />
+              </div>
+              <div className="text-2xl font-bold text-white mb-1">{chatbot.accessCount || 0}</div>
+              <div className="text-sm text-gray-400">Total de Acessos</div>
+            </CardContent>
+          </Card>
+          
+          <Card className="card-dark border-0 nylo-shadow">
+            <CardContent className="p-6 text-center">
+              <div className="flex items-center justify-center mb-2">
+                <Calendar className="w-8 h-8 text-blue-400" />
+              </div>
+              <div className="text-2xl font-bold text-blue-400 mb-1">{chatbot.todayAccessCount || 0}</div>
+              <div className="text-sm text-gray-400">Acessos Hoje</div>
+            </CardContent>
+          </Card>
+          
+          <Card className="card-dark border-0 nylo-shadow">
+            <CardContent className="p-6 text-center">
+              <div className="flex items-center justify-center mb-2">
+                <Users className="w-8 h-8 text-green-400" />
+              </div>
+              <div className="text-2xl font-bold text-green-400 mb-1">
+                {chatbot.accessHistory?.reduce((sum, day) => sum + day.uniqueVisitors, 0) || 0}
+              </div>
+              <div className="text-sm text-gray-400">Visitantes Únicos</div>
+            </CardContent>
+          </Card>
+          
+          <Card className="card-dark border-0 nylo-shadow">
+            <CardContent className="p-6 text-center">
+              <div className="flex items-center justify-center mb-2">
+                <div className={`w-3 h-3 rounded-full ${chatbot.isOnline ? 'bg-green-400' : 'bg-gray-400'}`}></div>
+              </div>
+              <div className={`text-2xl font-bold mb-1 ${chatbot.isOnline ? 'text-green-400' : 'text-gray-400'}`}>
+                {chatbot.isOnline ? 'Online' : 'Offline'}
+              </div>
+              <div className="text-sm text-gray-400">Status Atual</div>
+            </CardContent>
+          </Card>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Link Público */}
           <Card className="card-dark border-0 nylo-shadow">
@@ -191,36 +238,38 @@ const Share = () => {
           </Card>
         </div>
 
-        {/* Estatísticas */}
-        <Card className="mt-8 card-dark border-0 nylo-shadow">
-          <CardHeader>
-            <CardTitle className="text-white">Estatísticas do Chatbot</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary mb-1">0</div>
-                <div className="text-sm text-gray-400">Conversas Iniciadas</div>
+        {/* Histórico de Acessos */}
+        {chatbot.accessHistory && chatbot.accessHistory.length > 0 && (
+          <Card className="mt-8 card-dark border-0 nylo-shadow">
+            <CardHeader>
+              <CardTitle className="text-white">Histórico de Acessos (Últimos 7 dias)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {chatbot.accessHistory.slice(-7).map((day, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-black/20 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <Calendar className="w-4 h-4 text-gray-400" />
+                      <span className="text-white font-medium">
+                        {new Date(day.date).toLocaleDateString('pt-BR')}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-6">
+                      <div className="text-center">
+                        <div className="text-primary font-semibold">{day.count}</div>
+                        <div className="text-xs text-gray-400">Acessos</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-blue-400 font-semibold">{day.uniqueVisitors}</div>
+                        <div className="text-xs text-gray-400">Únicos</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-400 mb-1">0</div>
-                <div className="text-sm text-gray-400">Mensagens Enviadas</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-400 mb-1">
-                  {chatbot.isOnline ? 'Online' : 'Offline'}
-                </div>
-                <div className="text-sm text-gray-400">Status Atual</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-purple-400 mb-1">
-                  {new Date(chatbot.lastUpdated).toLocaleDateString()}
-                </div>
-                <div className="text-sm text-gray-400">Última Atualização</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Dicas de Compartilhamento */}
         <Card className="mt-8 card-dark border border-primary/20 bg-primary/5">

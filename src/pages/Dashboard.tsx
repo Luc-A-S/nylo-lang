@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Bot, Plus, BookOpen, Edit, Eye, Share, Trash2 } from 'lucide-react';
+import { Bot, Plus, BookOpen, Edit, Eye, Share, Trash2, LogOut, BarChart3 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Dashboard = () => {
@@ -36,6 +36,13 @@ const Dashboard = () => {
     if (window.confirm(`Tem certeza que deseja excluir o chatbot "${name}"? Esta ação não pode ser desfeita.`)) {
       deleteChatbot(id);
       toast.success('Chatbot excluído com sucesso!');
+    }
+  };
+
+  const handleLogout = () => {
+    if (window.confirm('Tem certeza que deseja sair?')) {
+      navigate('/');
+      toast.success('Logout realizado com sucesso!');
     }
   };
 
@@ -77,6 +84,14 @@ const Dashboard = () => {
             >
               <BookOpen className="w-4 h-4 mr-2" />
               Aprender Nylo
+            </Button>
+            <Button 
+              variant="ghost" 
+              onClick={handleLogout}
+              className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Sair
             </Button>
           </div>
         </div>
@@ -206,6 +221,15 @@ const Dashboard = () => {
                 <CardContent className="space-y-4">
                   <div className="text-sm text-gray-500">
                     Última atualização: {formatDate(bot.lastUpdated)}
+                  </div>
+
+                  {/* Estatísticas de acesso */}
+                  <div className="flex items-center justify-between text-xs text-gray-400 bg-black/20 p-2 rounded">
+                    <span className="flex items-center gap-1">
+                      <BarChart3 className="w-3 h-3" />
+                      Acessos: {bot.accessCount || 0}
+                    </span>
+                    <span>Hoje: {bot.todayAccessCount || 0}</span>
                   </div>
                   
                   <div className="flex space-x-2">
