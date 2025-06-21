@@ -142,20 +142,32 @@ const Settings = () => {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8 max-w-4xl relative z-10">
         <Tabs defaultValue="appearance" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 glass-effect border-white/20">
-            <TabsTrigger value="appearance" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
+          <TabsList className="grid w-full grid-cols-4 bg-nylo-card/50 backdrop-blur-lg border border-white/10 p-1 rounded-lg">
+            <TabsTrigger 
+              value="appearance" 
+              className="flex items-center justify-center px-4 py-3 rounded-md text-gray-300 hover:text-white hover:bg-white/5 transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary-light data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25"
+            >
               <Palette className="w-4 h-4 mr-2" />
               Aparência
             </TabsTrigger>
-            <TabsTrigger value="messages" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
+            <TabsTrigger 
+              value="messages" 
+              className="flex items-center justify-center px-4 py-3 rounded-md text-gray-300 hover:text-white hover:bg-white/5 transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary-light data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25"
+            >
               <MessageSquare className="w-4 h-4 mr-2" />
               Mensagens
             </TabsTrigger>
-            <TabsTrigger value="sharing" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
+            <TabsTrigger 
+              value="sharing" 
+              className="flex items-center justify-center px-4 py-3 rounded-md text-gray-300 hover:text-white hover:bg-white/5 transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary-light data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25"
+            >
               <Globe className="w-4 h-4 mr-2" />
               Compartilhamento
             </TabsTrigger>
-            <TabsTrigger value="advanced" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
+            <TabsTrigger 
+              value="advanced" 
+              className="flex items-center justify-center px-4 py-3 rounded-md text-gray-300 hover:text-white hover:bg-white/5 transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary-light data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25"
+            >
               <BarChart3 className="w-4 h-4 mr-2" />
               Avançado
             </TabsTrigger>
