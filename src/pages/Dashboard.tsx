@@ -1,5 +1,4 @@
 
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNylo } from '@/contexts/NyloContext';
@@ -15,10 +14,39 @@ import { toast } from 'sonner';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { chatbots, createChatbot, deleteChatbot } = useNylo();
+  const { chatbots, createChatbot, deleteChatbot, createChatbotFromTemplate } = useNylo();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
   const [newBotName, setNewBotName] = useState('');
   const [newBotDescription, setNewBotDescription] = useState('');
+
+  const templates = [
+    {
+      id: 'ecommerce',
+      name: 'E-commerce',
+      description: 'Atendimento para lojas online',
+      icon: '🏪',
+      color: 'bg-green-500',
+      defaultName: 'Atendimento E-commerce'
+    },
+    {
+      id: 'empresa',
+      name: 'Empresa',
+      description: 'Atendimento corporativo',
+      icon: '🏢',
+      color: 'bg-blue-500',
+      defaultName: 'Atendimento Empresarial'
+    },
+    {
+      id: 'faq',
+      name: 'FAQ',
+      description: 'Perguntas frequentes',
+      icon: '❓',
+      color: 'bg-purple-500',
+      defaultName: 'FAQ Automático'
+    }
+  ];
 
   const handleCreateBot = () => {
     if (!newBotName.trim()) {
@@ -30,6 +58,31 @@ const Dashboard = () => {
     setIsCreateDialogOpen(false);
     setNewBotName('');
     setNewBotDescription('');
+    toast.success('Chatbot criado com sucesso!');
+    navigate(`/editor/${newBot.id}`);
+  };
+
+  const handleTemplateSelect = (templateId: string) => {
+    const template = templates.find(t => t.id === templateId);
+    if (template) {
+      setSelectedTemplate(templateId);
+      setNewBotName(template.defaultName);
+      setNewBotDescription('');
+      setIsTemplateDialogOpen(true);
+    }
+  };
+
+  const handleCreateFromTemplate = () => {
+    if (!newBotName.trim()) {
+      toast.error('Nome do chatbot é obrigatório');
+      return;
+    }
+
+    const newBot = createChatbotFromTemplate(selectedTemplate, newBotName, newBotDescription);
+    setIsTemplateDialogOpen(false);
+    setNewBotName('');
+    setNewBotDescription('');
+    setSelectedTemplate('');
     toast.success('Chatbot criado com sucesso!');
     navigate(`/editor/${newBot.id}`);
   };
@@ -62,7 +115,6 @@ const Dashboard = () => {
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-blue-500/20 to-primary/20 rounded-full blur-3xl floating-animation" style={{animationDelay: '-3s'}}></div>
       </div>
 
-      {/* Header */}
       <header className="relative z-10 border-b border-white/10 bg-black/20 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-4">
@@ -281,7 +333,6 @@ const Dashboard = () => {
                     Última atualização: {formatDate(bot.lastUpdated)}
                   </div>
 
-                  {/* Estatísticas de acesso */}
                   <div className="flex items-center justify-between text-xs text-gray-400 bg-black/20 p-2 rounded">
                     <span className="flex items-center gap-1">
                       <BarChart3 className="w-3 h-3" />
@@ -331,41 +382,79 @@ const Dashboard = () => {
         <div className="mt-16">
           <h3 className="text-xl font-semibold text-white mb-6">Templates Prontos</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="card-dark border-dashed border-2 border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer">
-              <CardContent className="p-6 text-center">
-                <div className="w-12 h-12 gradient-blue rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <span className="text-white font-bold">🏪</span>
-                </div>
-                <h4 className="font-semibold text-white mb-2">E-commerce</h4>
-                <p className="text-sm text-gray-400">Suporte para lojas online</p>
-              </CardContent>
-            </Card>
-            
-            <Card className="card-dark border-dashed border-2 border-blue-400/30 bg-blue-400/5 hover:bg-blue-400/10 transition-colors cursor-pointer">
-              <CardContent className="p-6 text-center">
-                <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <span className="text-white font-bold">🏢</span>
-                </div>
-                <h4 className="font-semibold text-white mb-2">Empresa</h4>
-                <p className="text-sm text-gray-400">Atendimento corporativo</p>
-              </CardContent>
-            </Card>
-            
-            <Card className="card-dark border-dashed border-2 border-purple-400/30 bg-purple-400/5 hover:bg-purple-400/10 transition-colors cursor-pointer">
-              <CardContent className="p-6 text-center">
-                <div className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <span className="text-white font-bold">❓</span>
-                </div>
-                <h4 className="font-semibold text-white mb-2">FAQ</h4>
-                <p className="text-sm text-gray-400">Perguntas frequentes</p>
-              </CardContent>
-            </Card>
+            {templates.map((template) => (
+              <Card 
+                key={template.id}
+                className="card-dark border-white/20 hover:border-primary/40 transition-all duration-300 cursor-pointer group hover:scale-[1.02]"
+                onClick={() => handleTemplateSelect(template.id)}
+              >
+                <CardContent className="p-6 text-center">
+                  <div className={`w-12 h-12 ${template.color} rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>
+                    <span className="text-white font-bold text-xl">{template.icon}</span>
+                  </div>
+                  <h4 className="font-semibold text-white mb-2">{template.name}</h4>
+                  <p className="text-sm text-gray-400 mb-4">{template.description}</p>
+                  <Button className="w-full gradient-blue hover:opacity-90 transition-opacity">
+                    Usar Template
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
+
+        {/* Template Dialog */}
+        <Dialog open={isTemplateDialogOpen} onOpenChange={setIsTemplateDialogOpen}>
+          <DialogContent className="card-dark border-primary/30 nylo-shadow text-white">
+            <DialogHeader>
+              <DialogTitle className="gradient-text">
+                Criar Chatbot com Template {templates.find(t => t.id === selectedTemplate)?.name}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-gray-300 mb-2 block">
+                  Nome do Chatbot *
+                </label>
+                <Input
+                  placeholder="Ex: Atendimento Loja Online"
+                  value={newBotName}
+                  onChange={(e) => setNewBotName(e.target.value)}
+                  className="glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-300 mb-2 block">
+                  Descrição (opcional)
+                </label>
+                <Textarea
+                  placeholder="Descreva o propósito do seu chatbot..."
+                  value={newBotDescription}
+                  onChange={(e) => setNewBotDescription(e.target.value)}
+                  className="glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary min-h-[80px]"
+                />
+              </div>
+              <div className="flex space-x-3 pt-4">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsTemplateDialogOpen(false)}
+                  className="flex-1 glass-effect border-white/20 text-white hover:bg-white/10"
+                >
+                  Cancelar
+                </Button>
+                <Button 
+                  onClick={handleCreateFromTemplate}
+                  className="flex-1 gradient-blue hover:opacity-90"
+                >
+                  Criar com Template
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );
 };
 
 export default Dashboard;
-
