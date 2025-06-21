@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -77,24 +78,18 @@ export const TemplateSelector = ({ onClose }: TemplateSelectorProps) => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <h4 className="text-lg font-medium text-white mb-2">Mensagem de Boas-vindas</h4>
+              <h4 className="text-lg font-medium text-white mb-2">Preview da Conversa</h4>
               <div className="glass-effect p-4 rounded-lg border border-white/10">
-                <p className="text-gray-300">{previewTemplate.config.welcomeMessage}</p>
+                <p className="text-gray-300">{previewTemplate.preview}</p>
               </div>
             </div>
 
             <div>
-              <h4 className="text-lg font-medium text-white mb-2">Fluxos Configurados</h4>
-              <div className="space-y-3">
-                {previewTemplate.config.flows.map((flow, index) => (
-                  <div key={index} className="glass-effect p-4 rounded-lg border border-white/10">
-                    <h5 className="font-medium text-primary mb-1">{flow.name}</h5>
-                    <p className="text-sm text-gray-400 mb-2">
-                      Palavras-chave: {flow.trigger.join(', ')}
-                    </p>
-                    <p className="text-gray-300 text-sm">{flow.responses[0]}</p>
-                  </div>
-                ))}
+              <h4 className="text-lg font-medium text-white mb-2">Código NyloLang</h4>
+              <div className="glass-effect p-4 rounded-lg border border-white/10">
+                <pre className="text-xs text-gray-300 font-mono whitespace-pre-wrap overflow-x-auto">
+                  {previewTemplate.sourceCode}
+                </pre>
               </div>
             </div>
           </CardContent>
