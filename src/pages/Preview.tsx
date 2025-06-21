@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useNylo } from '@/contexts/NyloContext';
@@ -6,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, RefreshCw, Share, Bot } from 'lucide-react';
 
 interface ChatMessage {
   id: string;
@@ -173,24 +173,30 @@ const Preview = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-nylo-blue/5 via-white to-nylo-cyan/5">
+    <div className="min-h-screen bg-gradient-to-br from-nylo-dark via-nylo-darker to-nylo-card">
+      {/* Background Effects */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-full blur-3xl floating-animation"></div>
+      </div>
+
       {/* Header */}
-      <header className="border-b border-nylo-gray-200 bg-white/80 backdrop-blur-sm">
+      <header className="relative z-10 border-b border-white/10 bg-black/20 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Button 
                 variant="ghost" 
                 onClick={() => navigate(`/editor/${chatbot.id}`)}
-                className="text-nylo-gray-600 hover:text-nylo-blue"
+                className="text-gray-400 hover:text-white hover:bg-white/10"
               >
-                ← Editor
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Editor
               </Button>
               <div>
-                <h1 className="text-lg font-semibold text-nylo-black">Preview: {chatbot.name}</h1>
+                <h1 className="text-lg font-semibold text-white">Preview: {chatbot.name}</h1>
                 <Badge 
                   variant="outline" 
-                  className="text-xs text-nylo-blue border-nylo-blue/20"
+                  className="text-xs text-primary border-primary/30"
                 >
                   Modo Teste
                 </Badge>
@@ -208,14 +214,16 @@ const Preview = () => {
                     addBotMessage(parsedFlows.inicio.message, parsedFlows.inicio.buttons);
                   }
                 }}
-                className="border-nylo-gray-200"
+                className="glass-effect border-white/20 text-white hover:bg-white/10"
               >
+                <RefreshCw className="w-4 h-4 mr-2" />
                 Reiniciar Chat
               </Button>
               <Button 
                 onClick={handleGenerateLink}
                 className="gradient-blue hover:opacity-90 nylo-shadow"
               >
+                <Share className="w-4 h-4 mr-2" />
                 Gerar Link Público
               </Button>
             </div>
@@ -224,13 +232,13 @@ const Preview = () => {
       </header>
 
       {/* Chat Interface */}
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <Card className="h-[600px] border-0 nylo-shadow overflow-hidden">
+      <div className="container mx-auto px-4 py-8 max-w-4xl relative z-10">
+        <Card className="h-[600px] card-dark border-0 nylo-shadow overflow-hidden">
           {/* Chat Header */}
           <div className="gradient-blue p-4 text-white">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                <span className="font-bold">🤖</span>
+                <Bot className="w-6 h-6" />
               </div>
               <div>
                 <h3 className="font-semibold">{chatbot.settings.businessName}</h3>
@@ -252,7 +260,7 @@ const Preview = () => {
                 <div
                   className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
                     message.isBot
-                      ? 'bg-nylo-gray-100 text-nylo-black'
+                      ? 'bg-gray-700 text-white'
                       : 'gradient-blue text-white'
                   }`}
                 >
@@ -265,14 +273,14 @@ const Preview = () => {
                           size="sm"
                           variant="outline"
                           onClick={() => handleButtonClick(button.action)}
-                          className="w-full text-left border-nylo-blue/20 text-nylo-blue hover:bg-nylo-blue hover:text-white transition-colors"
+                          className="w-full text-left border-primary/20 text-primary hover:bg-primary hover:text-white transition-colors"
                         >
                           {button.text}
                         </Button>
                       ))}
                     </div>
                   )}
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-400 mt-1">
                     {message.timestamp.toLocaleTimeString()}
                   </p>
                 </div>
@@ -282,14 +290,14 @@ const Preview = () => {
 
           {/* Input */}
           {isWaitingForName && (
-            <div className="p-4 border-t border-nylo-gray-200">
+            <div className="p-4 border-t border-white/10">
               <div className="flex space-x-2">
                 <Input
                   value={userInput}
                   onChange={(e) => setUserInput(e.target.value)}
                   placeholder="Digite seu nome..."
                   onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  className="border-nylo-gray-200 focus:border-nylo-blue"
+                  className="glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary"
                 />
                 <Button
                   onClick={handleSendMessage}

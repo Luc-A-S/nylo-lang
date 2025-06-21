@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { ArrowLeft, Eye, Power, PowerOff, Save, Code, HelpCircle, Play } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Editor = () => {
@@ -44,24 +45,6 @@ const Editor = () => {
 
   const nyloKeywords = ['mensagem', 'botao', 'fluxo', 'inicio', 'fim', 'ir_para'];
   
-  const highlightSyntax = (code: string) => {
-    let highlighted = code;
-    
-    // Highlight keywords
-    nyloKeywords.forEach(keyword => {
-      const regex = new RegExp(`\\b${keyword}\\b`, 'g');
-      highlighted = highlighted.replace(regex, `<span class="text-nylo-blue font-semibold">${keyword}</span>`);
-    });
-    
-    // Highlight strings
-    highlighted = highlighted.replace(/"([^"]*)"/g, '<span class="text-green-600">"$1"</span>');
-    
-    // Highlight comments
-    highlighted = highlighted.replace(/#.*$/gm, '<span class="text-nylo-gray-500 italic">$&</span>');
-    
-    return highlighted;
-  };
-
   const snippets = [
     {
       title: 'Mensagem Simples',
@@ -97,28 +80,34 @@ const Editor = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-nylo-blue/5 via-white to-nylo-cyan/5">
+    <div className="min-h-screen bg-gradient-to-br from-nylo-dark via-nylo-darker to-nylo-card">
+      {/* Background Effects */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-gradient-to-r from-primary/10 to-purple-500/10 rounded-full blur-3xl floating-animation"></div>
+      </div>
+
       {/* Header */}
-      <header className="border-b border-nylo-gray-200 bg-white/80 backdrop-blur-sm">
+      <header className="relative z-10 border-b border-white/10 bg-black/20 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Button 
                 variant="ghost" 
                 onClick={() => navigate('/dashboard')}
-                className="text-nylo-gray-600 hover:text-nylo-blue"
+                className="text-gray-400 hover:text-white hover:bg-white/10"
               >
-                ← Voltar
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Voltar
               </Button>
-              <Separator orientation="vertical" className="h-6" />
+              <Separator orientation="vertical" className="h-6 bg-white/20" />
               <div>
-                <h1 className="text-lg font-semibold text-nylo-black">{chatbot.name}</h1>
+                <h1 className="text-lg font-semibold text-white">{chatbot.name}</h1>
                 <div className="flex items-center space-x-2">
                   <Badge 
                     variant={chatbot.isOnline ? "default" : "secondary"}
                     className={chatbot.isOnline 
-                      ? "bg-green-100 text-green-700 border-green-200" 
-                      : "bg-nylo-gray-100 text-nylo-gray-600 border-nylo-gray-200"
+                      ? "bg-green-500/20 text-green-400 border-green-400/30" 
+                      : "bg-gray-500/20 text-gray-400 border-gray-400/30"
                     }
                   >
                     {chatbot.isOnline ? 'Online' : 'Offline'}
@@ -131,24 +120,36 @@ const Editor = () => {
               <Button 
                 variant="outline" 
                 onClick={() => navigate(`/preview/${chatbot.id}`)}
-                className="border-nylo-gray-200"
+                className="glass-effect border-white/20 text-white hover:bg-white/10"
               >
+                <Eye className="w-4 h-4 mr-2" />
                 Preview
               </Button>
               <Button 
                 variant="outline" 
                 onClick={handleToggleOnline}
                 className={chatbot.isOnline 
-                  ? "border-red-200 text-red-600 hover:bg-red-50"
-                  : "border-green-200 text-green-600 hover:bg-green-50"
+                  ? "border-red-400/30 text-red-400 hover:bg-red-400/10"
+                  : "border-green-400/30 text-green-400 hover:bg-green-400/10"
                 }
               >
-                {chatbot.isOnline ? 'Desativar' : 'Ativar'}
+                {chatbot.isOnline ? (
+                  <>
+                    <PowerOff className="w-4 h-4 mr-2" />
+                    Desativar
+                  </>
+                ) : (
+                  <>
+                    <Power className="w-4 h-4 mr-2" />
+                    Ativar
+                  </>
+                )}
               </Button>
               <Button 
                 onClick={handleSave}
                 className="gradient-blue hover:opacity-90 nylo-shadow"
               >
+                <Save className="w-4 h-4 mr-2" />
                 Salvar
               </Button>
             </div>
@@ -157,14 +158,17 @@ const Editor = () => {
       </header>
 
       {/* Main Editor */}
-      <div className="flex h-[calc(100vh-80px)]">
+      <div className="flex h-[calc(100vh-80px)] relative z-10">
         {/* Code Editor */}
         <div className="flex-1 flex flex-col">
-          <div className="p-4 bg-white border-b border-nylo-gray-200">
+          <div className="p-4 bg-black/20 border-b border-white/10">
             <div className="flex items-center justify-between">
-              <h2 className="font-semibold text-nylo-black">Editor NyloLang</h2>
+              <h2 className="font-semibold text-white flex items-center">
+                <Code className="w-4 h-4 mr-2" />
+                Editor NyloLang
+              </h2>
               <div className="flex items-center space-x-2">
-                <Badge variant="outline" className="text-xs">
+                <Badge variant="outline" className="text-xs border-primary/30 text-primary">
                   Nylo v1.0
                 </Badge>
               </div>
@@ -175,7 +179,7 @@ const Editor = () => {
             <Textarea
               value={sourceCode}
               onChange={(e) => setSourceCode(e.target.value)}
-              className="w-full h-full font-mono text-sm border-nylo-gray-200 focus:border-nylo-blue resize-none"
+              className="w-full h-full font-mono text-sm glass-effect border-white/20 text-white placeholder-gray-500 focus:border-primary resize-none"
               placeholder="# Digite seu código NyloLang aqui..."
               style={{ minHeight: '500px' }}
             />
@@ -183,24 +187,36 @@ const Editor = () => {
         </div>
 
         {/* Sidebar */}
-        <div className="w-80 border-l border-nylo-gray-200 bg-white">
+        <div className="w-80 border-l border-white/10 bg-black/20 backdrop-blur-sm">
           <Tabs defaultValue="snippets" className="h-full">
-            <TabsList className="w-full justify-start px-4 pt-4">
-              <TabsTrigger value="snippets">Snippets</TabsTrigger>
-              <TabsTrigger value="help">Ajuda</TabsTrigger>
+            <TabsList className="w-full justify-start px-4 pt-4 bg-transparent">
+              <TabsTrigger 
+                value="snippets" 
+                className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary text-gray-400"
+              >
+                <Code className="w-4 h-4 mr-2" />
+                Snippets
+              </TabsTrigger>
+              <TabsTrigger 
+                value="help"
+                className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary text-gray-400"
+              >
+                <HelpCircle className="w-4 h-4 mr-2" />
+                Ajuda
+              </TabsTrigger>
             </TabsList>
             
             <TabsContent value="snippets" className="px-4 pb-4 space-y-4">
               <div>
-                <h3 className="font-semibold text-nylo-black mb-3">Código Pronto</h3>
+                <h3 className="font-semibold text-white mb-3">Código Pronto</h3>
                 <div className="space-y-3">
                   {snippets.map((snippet, index) => (
-                    <Card key={index} className="border-nylo-gray-200 cursor-pointer hover:bg-nylo-gray-50 transition-colors">
+                    <Card key={index} className="card-dark cursor-pointer hover:bg-white/5 transition-colors">
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-sm text-nylo-black">{snippet.title}</CardTitle>
+                        <CardTitle className="text-sm text-white">{snippet.title}</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <pre className="text-xs text-nylo-gray-600 bg-nylo-gray-50 p-2 rounded overflow-x-auto">
+                        <pre className="text-xs text-gray-400 bg-black/30 p-2 rounded overflow-x-auto">
                           {snippet.code}
                         </pre>
                         <Button 
@@ -210,7 +226,7 @@ const Editor = () => {
                             setSourceCode(prev => prev + '\n\n' + snippet.code);
                             toast.success('Snippet adicionado!');
                           }}
-                          className="w-full mt-2 text-nylo-blue hover:text-nylo-cyan hover:bg-nylo-blue/5"
+                          className="w-full mt-2 text-primary hover:text-primary-light hover:bg-primary/10"
                         >
                           Inserir
                         </Button>
@@ -224,36 +240,36 @@ const Editor = () => {
             <TabsContent value="help" className="px-4 pb-4">
               <div className="space-y-4">
                 <div>
-                  <h3 className="font-semibold text-nylo-black mb-3">Tokens NyloLang</h3>
+                  <h3 className="font-semibold text-white mb-3">Tokens NyloLang</h3>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <code className="text-nylo-blue">mensagem:</code>
-                      <span className="text-nylo-gray-600">Define uma mensagem</span>
+                      <code className="text-primary">mensagem:</code>
+                      <span className="text-gray-400">Define uma mensagem</span>
                     </div>
                     <div className="flex justify-between">
-                      <code className="text-nylo-blue">botao:</code>
-                      <span className="text-nylo-gray-600">Cria um botão</span>
+                      <code className="text-primary">botao:</code>
+                      <span className="text-gray-400">Cria um botão</span>
                     </div>
                     <div className="flex justify-between">
-                      <code className="text-nylo-blue">fluxo:</code>
-                      <span className="text-nylo-gray-600">Define um fluxo</span>
+                      <code className="text-primary">fluxo:</code>
+                      <span className="text-gray-400">Define um fluxo</span>
                     </div>
                     <div className="flex justify-between">
-                      <code className="text-nylo-blue">inicio:</code>
-                      <span className="text-nylo-gray-600">Fluxo inicial</span>
+                      <code className="text-primary">inicio:</code>
+                      <span className="text-gray-400">Fluxo inicial</span>
                     </div>
                     <div className="flex justify-between">
-                      <code className="text-nylo-blue">fim</code>
-                      <span className="text-nylo-gray-600">Finaliza o código</span>
+                      <code className="text-primary">fim</code>
+                      <span className="text-gray-400">Finaliza o código</span>
                     </div>
                   </div>
                 </div>
                 
-                <Separator />
+                <Separator className="bg-white/20" />
                 
                 <div>
-                  <h4 className="font-medium text-nylo-black mb-2">Exemplo Básico</h4>
-                  <pre className="text-xs bg-nylo-gray-50 p-3 rounded overflow-x-auto">
+                  <h4 className="font-medium text-white mb-2">Exemplo Básico</h4>
+                  <pre className="text-xs bg-black/30 p-3 rounded overflow-x-auto text-gray-300">
 {`inicio:
   mensagem:
     "Olá! Como posso ajudar?"
