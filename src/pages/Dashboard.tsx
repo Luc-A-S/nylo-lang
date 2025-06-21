@@ -1,4 +1,5 @@
 
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNylo } from '@/contexts/NyloContext';
@@ -39,10 +40,8 @@ const Dashboard = () => {
   };
 
   const handleLogout = () => {
-    if (window.confirm('Tem certeza que deseja sair?')) {
-      navigate('/');
-      toast.success('Logout realizado com sucesso!');
-    }
+    navigate('/');
+    toast.success('Logout realizado com sucesso!');
   };
 
   const formatDate = (date: Date) => {
@@ -84,14 +83,44 @@ const Dashboard = () => {
               <BookOpen className="w-4 h-4 mr-2" />
               Aprender Nylo
             </Button>
-            <Button 
-              variant="ghost" 
-              onClick={handleLogout}
-              className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Sair
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sair
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="card-dark border-red-500/30 nylo-shadow max-w-md">
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="text-white text-lg flex items-center gap-3">
+                    <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
+                      <LogOut className="w-5 h-5 text-red-400" />
+                    </div>
+                    Sair da Plataforma
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="text-gray-300 leading-relaxed">
+                    Tem certeza que deseja sair da plataforma Nylo?
+                    <br /><br />
+                    <span className="text-gray-400">Você precisará fazer login novamente para acessar seus chatbots.</span>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="gap-3">
+                  <AlertDialogCancel className="glass-effect border-white/20 text-white hover:bg-white/10">
+                    Cancelar
+                  </AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={handleLogout}
+                    className="bg-red-500 hover:bg-red-600 text-white border-0"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sim, sair
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       </header>
@@ -339,3 +368,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
