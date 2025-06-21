@@ -11,6 +11,7 @@ import Editor from "./pages/Editor";
 import Preview from "./pages/Preview";
 import Share from "./pages/Share";
 import Learn from "./pages/Learn";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/editor/:id?" element={<Editor />} />
             <Route path="/preview/:id" element={<Preview />} />
+            <Route path="/settings/:id" element={<Settings />} />
             <Route path="/share/:id" element={<Share />} />
             <Route path="/learn" element={<Learn />} />
             <Route path="*" element={<NotFound />} />

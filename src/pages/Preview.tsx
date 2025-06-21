@@ -1,12 +1,11 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useNylo } from '@/contexts/NyloContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, RefreshCw, Share, Bot } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Share, Bot, Settings, Maximize2, Minimize2 } from 'lucide-react';
 
 interface ChatMessage {
   id: string;
@@ -33,6 +32,16 @@ const Preview = () => {
   const [isWaitingForName, setIsWaitingForName] = useState(false);
   const [userInput, setUserInput] = useState('');
   const [parsedFlows, setParsedFlows] = useState<ParsedFlow>({});
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   useEffect(() => {
     if (!chatbot) {
@@ -169,15 +178,24 @@ const Preview = () => {
     navigate(`/share/${chatbot.id}`);
   };
 
+  const handleRestart = () => {
+    setMessages([]);
+    setCurrentFlow('inicio');
+    setIsWaitingForName(false);
+    if (parsedFlows.inicio) {
+      addBotMessage(parsedFlows.inicio.message, parsedFlows.inicio.buttons);
+    }
+  };
+
   if (!chatbot) {
     return <div>Carregando...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-nylo-dark via-nylo-darker to-nylo-card">
+    <div className={`min-h-screen bg-gradient-to-br from-nylo-dark via-nylo-darker to-nylo-card ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}>
       {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
       </div>
 
       {/* Header */}
@@ -188,44 +206,62 @@ const Preview = () => {
               <Button 
                 variant="ghost" 
                 onClick={() => navigate(`/editor/${chatbot.id}`)}
-                className="text-gray-400 hover:text-white hover:bg-white/10"
+                className="text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Editor
               </Button>
               <div>
                 <h1 className="text-lg font-semibold text-white">Preview: {chatbot.name}</h1>
-                <Badge 
-                  variant="outline" 
-                  className="text-xs text-primary border-primary/30"
-                >
-                  Modo Teste
-                </Badge>
+                <div className="flex items-center space-x-2">
+                  <Badge 
+                    variant="outline" 
+                    className="text-xs text-primary border-primary/30"
+                  >
+                    Modo Teste
+                  </Badge>
+                  {isFullscreen && (
+                    <Badge 
+                      variant="outline" 
+                      className="text-xs text-green-400 border-green-400/30"
+                    >
+                      Tela Cheia
+                    </Badge>
+                  )}
+                </div>
               </div>
             </div>
             
             <div className="flex items-center space-x-3">
               <Button 
                 variant="outline" 
-                onClick={() => {
-                  setMessages([]);
-                  setCurrentFlow('inicio');
-                  setIsWaitingForName(false);
-                  if (parsedFlows.inicio) {
-                    addBotMessage(parsedFlows.inicio.message, parsedFlows.inicio.buttons);
-                  }
-                }}
-                className="glass-effect border-white/20 text-white hover:bg-white/10"
+                onClick={() => setIsFullscreen(!isFullscreen)}
+                className="glass-effect border-white/20 text-white hover:bg-white/10 transition-all"
+              >
+                {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={handleRestart}
+                className="glass-effect border-white/20 text-white hover:bg-white/10 transition-all"
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
-                Reiniciar Chat
+                Reiniciar
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => navigate(`/settings/${chatbot.id}`)}
+                className="glass-effect border-white/20 text-white hover:bg-white/10 transition-all"
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                Configurações
               </Button>
               <Button 
                 onClick={handleGenerateLink}
-                className="gradient-blue hover:opacity-90 nylo-shadow"
+                className="gradient-blue hover:opacity-90 nylo-shadow transition-all"
               >
                 <Share className="w-4 h-4 mr-2" />
-                Gerar Link Público
+                Compartilhar
               </Button>
             </div>
           </div>
@@ -233,83 +269,125 @@ const Preview = () => {
       </header>
 
       {/* Chat Interface */}
-      <div className="container mx-auto px-4 py-8 max-w-4xl relative z-10">
-        <Card className="h-[600px] card-dark border-0 nylo-shadow overflow-hidden">
+      <div className={`container mx-auto px-4 py-8 relative z-10 ${isFullscreen ? 'max-w-none h-full' : 'max-w-4xl'}`}>
+        <Card className={`card-dark border-0 nylo-shadow overflow-hidden transition-all duration-300 ${isFullscreen ? 'h-[calc(100vh-160px)]' : 'h-[600px]'}`}>
           {/* Chat Header */}
-          <div className="gradient-blue p-4 text-white">
+          <div 
+            className="p-4 text-white transition-colors duration-300"
+            style={{ background: `linear-gradient(135deg, ${chatbot.settings.brandingColor}, ${chatbot.settings.brandingColor}dd)` }}
+          >
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
                 <Bot className="w-6 h-6" />
               </div>
               <div>
                 <h3 className="font-semibold">{chatbot.settings.businessName}</h3>
                 <div className="flex items-center space-x-2 text-sm text-white/80">
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  <span>Online</span>
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <span>Online • Respondendo em segundos</span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Messages */}
-          <div className="flex-1 p-4 space-y-4 overflow-y-auto" style={{ height: '480px' }}>
-            {messages.map((message) => (
+          <div 
+            className={`flex-1 p-4 space-y-4 overflow-y-auto scroll-smooth ${isFullscreen ? 'h-[calc(100vh-300px)]' : 'h-[480px]'}`}
+            style={{ 
+              scrollbarWidth: 'thin',
+              scrollbarColor: `${chatbot.settings.brandingColor}30 transparent`
+            }}
+          >
+            {messages.map((message, index) => (
               <div
                 key={message.id}
-                className={`flex ${message.isBot ? 'justify-start' : 'justify-end'}`}
+                className={`flex ${message.isBot ? 'justify-start' : 'justify-end'} animate-fade-in`}
+                style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div
-                  className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
+                  className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl transition-all duration-300 hover:scale-[1.02] ${
                     message.isBot
-                      ? 'bg-gray-700 text-white'
-                      : 'gradient-blue text-white'
+                      ? 'bg-gradient-to-r from-gray-700 to-gray-600 text-white shadow-lg'
+                      : 'text-white shadow-lg'
                   }`}
+                  style={!message.isBot ? {
+                    background: `linear-gradient(135deg, ${chatbot.settings.brandingColor}, ${chatbot.settings.brandingColor}dd)`
+                  } : {}}
                 >
-                  <p className="text-sm whitespace-pre-line">{message.text}</p>
+                  <p className="text-sm whitespace-pre-line leading-relaxed">{message.text}</p>
                   {message.buttons && (
                     <div className="mt-3 space-y-2">
-                      {message.buttons.map((button, index) => (
+                      {message.buttons.map((button, buttonIndex) => (
                         <Button
-                          key={index}
+                          key={buttonIndex}
                           size="sm"
                           variant="outline"
                           onClick={() => handleButtonClick(button.action)}
-                          className="w-full text-left border-primary/20 text-primary hover:bg-primary hover:text-white transition-colors"
+                          className="w-full text-left border-primary/20 text-primary hover:bg-primary hover:text-white transition-all duration-300 hover:scale-105"
                         >
                           {button.text}
                         </Button>
                       ))}
                     </div>
                   )}
-                  <p className="text-xs text-gray-400 mt-1">
-                    {message.timestamp.toLocaleTimeString()}
+                  <p className="text-xs text-gray-400 mt-2 opacity-70">
+                    {message.timestamp.toLocaleTimeString('pt-BR', { 
+                      hour: '2-digit', 
+                      minute: '2-digit' 
+                    })}
                   </p>
                 </div>
               </div>
             ))}
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Input */}
           {isWaitingForName && (
-            <div className="p-4 border-t border-white/10">
+            <div className="p-4 border-t border-white/10 bg-black/10">
               <div className="flex space-x-2">
                 <Input
                   value={userInput}
                   onChange={(e) => setUserInput(e.target.value)}
                   placeholder="Digite seu nome..."
                   onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  className="glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary"
+                  className="glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary transition-all duration-300"
                 />
                 <Button
                   onClick={handleSendMessage}
-                  className="gradient-blue hover:opacity-90"
+                  disabled={!userInput.trim()}
+                  className="transition-all duration-300 hover:scale-105"
+                  style={{ 
+                    background: `linear-gradient(135deg, ${chatbot.settings.brandingColor}, ${chatbot.settings.brandingColor}dd)` 
+                  }}
                 >
                   Enviar
                 </Button>
               </div>
+              <p className="text-xs text-gray-400 mt-2 text-center">
+                Pressione Enter para enviar
+              </p>
             </div>
           )}
         </Card>
+
+        {/* Stats */}
+        {!isFullscreen && (
+          <div className="mt-6 grid grid-cols-3 gap-4 text-center">
+            <Card className="card-dark border-0 p-4">
+              <p className="text-2xl font-bold text-primary">{messages.length}</p>
+              <p className="text-sm text-gray-400">Mensagens</p>
+            </Card>
+            <Card className="card-dark border-0 p-4">
+              <p className="text-2xl font-bold text-green-400">{messages.filter(m => !m.isBot).length}</p>
+              <p className="text-sm text-gray-400">Respostas do Usuário</p>
+            </Card>
+            <Card className="card-dark border-0 p-4">
+              <p className="text-2xl font-bold text-blue-400">{currentFlow}</p>
+              <p className="text-sm text-gray-400">Fluxo Atual</p>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   );

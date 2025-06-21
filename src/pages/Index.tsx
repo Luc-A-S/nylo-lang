@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Bot, Zap, Globe, ArrowLeft } from 'lucide-react';
+import { Bot, Zap, Globe, ArrowLeft, Sparkles, Users, Shield, Rocket } from 'lucide-react';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -33,34 +33,54 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-nylo-dark via-nylo-darker to-nylo-card">
-      {/* Background Effects */}
+    <div className="min-h-screen bg-gradient-to-br from-nylo-dark via-nylo-darker to-nylo-card overflow-hidden">
+      {/* Enhanced Background Effects */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-blue-500/20 to-primary/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-full blur-3xl animate-wave"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-blue-500/20 to-primary/20 rounded-full blur-3xl animate-wave" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full blur-2xl animate-wave" style={{ animationDelay: '2s' }}></div>
+      </div>
+
+      {/* Floating particles */}
+      <div className="absolute inset-0">
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-primary/30 rounded-full animate-pulse"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 3}s`,
+              animationDuration: `${2 + Math.random() * 2}s`
+            }}
+          />
+        ))}
       </div>
 
       <div className="container mx-auto px-4 py-8 min-h-screen flex items-center justify-center relative z-10">
-        <div className="w-full max-w-md space-y-8">
-          {/* Logo e Header */}
+        <div className="w-full max-w-md space-y-8 animate-fade-in">
+          {/* Enhanced Logo e Header */}
           <div className="text-center space-y-6">
             <div className="relative">
-              <div className="w-24 h-24 mx-auto gradient-blue rounded-3xl flex items-center justify-center nylo-glow">
+              <div className="w-24 h-24 mx-auto gradient-blue rounded-3xl flex items-center justify-center nylo-glow animate-glow-pulse">
                 <Bot className="w-12 h-12 text-white" />
+              </div>
+              <div className="absolute -top-2 -right-2">
+                <Sparkles className="w-6 h-6 text-yellow-400 animate-pulse" />
               </div>
             </div>
             <div className="space-y-3">
-              <h1 className="text-5xl font-bold gradient-text">Nylo</h1>
+              <h1 className="text-5xl font-bold gradient-text animate-gradient-wave bg-gradient-to-r from-primary via-purple-500 to-primary bg-300% animate-gradient-wave">Nylo</h1>
               <p className="text-lg text-gray-300">Crie chatbots intuitivos sem complicação</p>
               <div className="flex items-center justify-center gap-2 text-sm text-primary">
-                <Zap className="w-4 h-4" />
+                <Zap className="w-4 h-4 animate-pulse" />
                 <span>Powered by NyloLang</span>
               </div>
             </div>
           </div>
 
-          {/* Card de Login/Cadastro */}
-          <Card className="card-dark border-0 nylo-shadow">
+          {/* Enhanced Card de Login/Cadastro */}
+          <Card className="card-dark border-0 nylo-shadow hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.02]">
             <CardContent className="p-8 space-y-6">
               {/* Header do formulário */}
               <div className="flex items-center justify-between">
@@ -72,7 +92,7 @@ const Index = () => {
                     variant="ghost"
                     size="sm"
                     onClick={() => setCurrentView('login')}
-                    className="text-gray-400 hover:text-white"
+                    className="text-gray-400 hover:text-white transition-colors"
                   >
                     <ArrowLeft className="w-4 h-4 mr-1" />
                     Voltar
@@ -84,7 +104,7 @@ const Index = () => {
                 <Button 
                   onClick={handleGoogleLogin}
                   disabled={isLoading}
-                  className="w-full h-12 glass-effect text-white hover:bg-white/10 transition-all duration-300 border border-white/20"
+                  className="w-full h-12 glass-effect text-white hover:bg-white/10 transition-all duration-300 border border-white/20 hover:border-white/40 hover:scale-[1.02]"
                 >
                   <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
                     <path fill="#4285f4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -109,30 +129,30 @@ const Index = () => {
                     <Input 
                       type="text" 
                       placeholder="Seu nome completo"
-                      className="h-12 glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary focus:ring-primary/20"
+                      className="h-12 glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary focus:ring-primary/20 transition-all duration-300 hover:border-white/30"
                     />
                   )}
                   <Input 
                     type="email" 
                     placeholder="seu@email.com"
-                    className="h-12 glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary focus:ring-primary/20"
+                    className="h-12 glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary focus:ring-primary/20 transition-all duration-300 hover:border-white/30"
                   />
                   <Input 
                     type="password" 
                     placeholder="Sua senha"
-                    className="h-12 glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary focus:ring-primary/20"
+                    className="h-12 glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary focus:ring-primary/20 transition-all duration-300 hover:border-white/30"
                   />
                   {currentView === 'register' && (
                     <Input 
                       type="password" 
                       placeholder="Confirme sua senha"
-                      className="h-12 glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary focus:ring-primary/20"
+                      className="h-12 glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary focus:ring-primary/20 transition-all duration-300 hover:border-white/30"
                     />
                   )}
                   <Button 
                     onClick={currentView === 'login' ? handleEmailLogin : handleEmailRegister}
                     disabled={isLoading}
-                    className="w-full h-12 gradient-blue hover:opacity-90 transition-all duration-300 nylo-shadow text-white font-medium"
+                    className="w-full h-12 gradient-blue hover:opacity-90 transition-all duration-300 nylo-shadow text-white font-medium hover:scale-[1.02]"
                   >
                     {isLoading ? (
                       <div className="flex items-center gap-2">
@@ -152,7 +172,7 @@ const Index = () => {
                     <>
                       Não tem conta?{' '}
                       <span 
-                        className="text-primary cursor-pointer hover:underline font-medium"
+                        className="text-primary cursor-pointer hover:underline font-medium transition-colors"
                         onClick={() => setCurrentView('register')}
                       >
                         Criar gratuitamente
@@ -162,7 +182,7 @@ const Index = () => {
                     <>
                       Já tem conta?{' '}
                       <span 
-                        className="text-primary cursor-pointer hover:underline font-medium"
+                        className="text-primary cursor-pointer hover:underline font-medium transition-colors"
                         onClick={() => setCurrentView('login')}
                       >
                         Fazer login
@@ -173,7 +193,7 @@ const Index = () => {
                 <Button 
                   variant="ghost" 
                   onClick={() => navigate('/learn')}
-                  className="text-primary hover:text-primary-light hover:bg-primary/10 transition-colors"
+                  className="text-primary hover:text-primary-light hover:bg-primary/10 transition-all duration-300 hover:scale-105"
                 >
                   <Globe className="w-4 h-4 mr-2" />
                   Primeiro acesso? Aprenda Nylo →
@@ -182,25 +202,41 @@ const Index = () => {
             </CardContent>
           </Card>
 
-          {/* Features */}
-          <div className="grid grid-cols-3 gap-6 text-center animate-fade-in">
-            <div className="space-y-3">
-              <div className="w-12 h-12 mx-auto glass-effect rounded-xl flex items-center justify-center border border-primary/30">
+          {/* Enhanced Features */}
+          <div className="grid grid-cols-3 gap-6 text-center">
+            <div className="space-y-3 group">
+              <div className="w-12 h-12 mx-auto glass-effect rounded-xl flex items-center justify-center border border-primary/30 group-hover:border-primary/60 transition-all duration-300 group-hover:scale-110">
                 <div className="w-6 h-6 gradient-blue rounded-lg"></div>
               </div>
-              <p className="text-sm text-gray-300 font-medium">Visual Builder</p>
+              <p className="text-sm text-gray-300 font-medium group-hover:text-white transition-colors">Visual Builder</p>
             </div>
-            <div className="space-y-3">
-              <div className="w-12 h-12 mx-auto glass-effect rounded-xl flex items-center justify-center border border-purple-500/30">
+            <div className="space-y-3 group">
+              <div className="w-12 h-12 mx-auto glass-effect rounded-xl flex items-center justify-center border border-purple-500/30 group-hover:border-purple-500/60 transition-all duration-300 group-hover:scale-110">
                 <Bot className="w-6 h-6 text-purple-400" />
               </div>
-              <p className="text-sm text-gray-300 font-medium">NyloLang</p>
+              <p className="text-sm text-gray-300 font-medium group-hover:text-white transition-colors">NyloLang</p>
             </div>
-            <div className="space-y-3">
-              <div className="w-12 h-12 mx-auto glass-effect rounded-xl flex items-center justify-center border border-blue-500/30">
+            <div className="space-y-3 group">
+              <div className="w-12 h-12 mx-auto glass-effect rounded-xl flex items-center justify-center border border-blue-500/30 group-hover:border-blue-500/60 transition-all duration-300 group-hover:scale-110">
                 <Zap className="w-6 h-6 text-blue-400" />
               </div>
-              <p className="text-sm text-gray-300 font-medium">Preview Live</p>
+              <p className="text-sm text-gray-300 font-medium group-hover:text-white transition-colors">Preview Live</p>
+            </div>
+          </div>
+
+          {/* New Trust indicators */}
+          <div className="flex items-center justify-center space-x-8 text-xs text-gray-400 pt-4">
+            <div className="flex items-center space-x-2">
+              <Shield className="w-4 h-4 text-green-400" />
+              <span>Seguro</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Users className="w-4 h-4 text-blue-400" />
+              <span>1000+ usuários</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Rocket className="w-4 h-4 text-purple-400" />
+              <span>Grátis para começar</span>
             </div>
           </div>
         </div>
