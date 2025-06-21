@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNylo } from '@/contexts/NyloContext';
@@ -114,7 +113,7 @@ const Dashboard = () => {
                 Novo Chatbot
               </Button>
             </DialogTrigger>
-            <DialogContent className="card-dark border-0 nylo-shadow">
+            <DialogContent className="card-dark border-primary/30 nylo-shadow text-white">
               <DialogHeader>
                 <DialogTitle className="gradient-text">Criar Novo Chatbot</DialogTitle>
               </DialogHeader>
