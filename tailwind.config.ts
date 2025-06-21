@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -25,8 +26,9 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					DEFAULT: '#356CFF',
+					light: '#71CFFF',
+					foreground: '#FFFFFF'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -52,16 +54,27 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				sidebar: {
-					DEFAULT: 'hsl(var(--sidebar-background))',
-					foreground: 'hsl(var(--sidebar-foreground))',
-					primary: 'hsl(var(--sidebar-primary))',
-					'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-					accent: 'hsl(var(--sidebar-accent))',
-					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-					border: 'hsl(var(--sidebar-border))',
-					ring: 'hsl(var(--sidebar-ring))'
+				nylo: {
+					blue: '#356CFF',
+					cyan: '#71CFFF',
+					black: '#111111',
+					white: '#FFFFFF',
+					gray: {
+						50: '#F8FAFC',
+						100: '#F1F5F9',
+						200: '#E2E8F0',
+						300: '#CBD5E1',
+						400: '#94A3B8',
+						500: '#64748B',
+						600: '#475569',
+						700: '#334155',
+						800: '#1E293B',
+						900: '#0F172A'
+					}
 				}
+			},
+			fontFamily: {
+				'inter': ['Inter', 'system-ui', 'sans-serif'],
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,11 +97,31 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in': {
+					'0%': { opacity: '0', transform: 'translateY(10px)' },
+					'100%': { opacity: '1', transform: 'translateY(0)' }
+				},
+				'slide-up': {
+					'0%': { opacity: '0', transform: 'translateY(20px)' },
+					'100%': { opacity: '1', transform: 'translateY(0)' }
+				},
+				'wave': {
+					'0%, 100%': { transform: 'scale(1)' },
+					'50%': { transform: 'scale(1.1)' }
+				},
+				'gradient-wave': {
+					'0%, 100%': { backgroundPosition: '0% 50%' },
+					'50%': { backgroundPosition: '100% 50%' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.5s ease-out',
+				'slide-up': 'slide-up 0.6s ease-out',
+				'wave': 'wave 2s ease-in-out infinite',
+				'gradient-wave': 'gradient-wave 3s ease-in-out infinite'
 			}
 		}
 	},
