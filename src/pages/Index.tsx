@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { Bot, Sparkles, Zap, Globe } from 'lucide-react';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -11,7 +12,6 @@ const Index = () => {
 
   const handleGoogleLogin = () => {
     setIsLoading(true);
-    // Simula login
     setTimeout(() => {
       navigate('/dashboard');
     }, 1500);
@@ -25,30 +25,43 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-nylo-blue/5 via-white to-nylo-cyan/5">
-      <div className="container mx-auto px-4 py-8 min-h-screen flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-nylo-dark via-nylo-darker to-nylo-card">
+      {/* Background Effects */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-full blur-3xl floating-animation"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-blue-500/20 to-primary/20 rounded-full blur-3xl floating-animation" style={{animationDelay: '-3s'}}></div>
+      </div>
+
+      <div className="container mx-auto px-4 py-8 min-h-screen flex items-center justify-center relative z-10">
         <div className="w-full max-w-md space-y-8">
-          {/* Logo Animada */}
-          <div className="text-center space-y-4">
-            <div className="animate-wave">
-              <div className="w-20 h-20 mx-auto gradient-blue rounded-2xl flex items-center justify-center nylo-glow">
-                <span className="text-3xl font-bold text-white">N</span>
+          {/* Logo e Header */}
+          <div className="text-center space-y-6">
+            <div className="relative">
+              <div className="w-24 h-24 mx-auto gradient-blue rounded-3xl flex items-center justify-center nylo-glow pulse-glow">
+                <Bot className="w-12 h-12 text-white" />
+              </div>
+              <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center animate-bounce">
+                <Sparkles className="w-4 h-4 text-white" />
               </div>
             </div>
-            <div className="space-y-2">
-              <h1 className="text-4xl font-bold gradient-text">Nylo</h1>
-              <p className="text-nylo-gray-600">Crie chatbots intuitivos sem complicação</p>
+            <div className="space-y-3">
+              <h1 className="text-5xl font-bold gradient-text">Nylo</h1>
+              <p className="text-lg text-gray-300">Crie chatbots intuitivos sem complicação</p>
+              <div className="flex items-center justify-center gap-2 text-sm text-primary">
+                <Zap className="w-4 h-4" />
+                <span>Powered by NyloLang</span>
+              </div>
             </div>
           </div>
 
           {/* Card de Login */}
-          <Card className="nylo-shadow border-0">
+          <Card className="card-dark border-0 nylo-shadow">
             <CardContent className="p-8 space-y-6">
               <div className="space-y-4">
                 <Button 
                   onClick={handleGoogleLogin}
                   disabled={isLoading}
-                  className="w-full h-12 bg-white border border-nylo-gray-200 text-nylo-gray-700 hover:bg-nylo-gray-50 transition-all duration-300"
+                  className="w-full h-12 glass-effect text-white hover:bg-white/10 transition-all duration-300 border border-white/20"
                 >
                   <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
                     <path fill="#4285f4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -61,10 +74,10 @@ const Index = () => {
 
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-nylo-gray-200"></div>
+                    <div className="w-full border-t border-white/20"></div>
                   </div>
                   <div className="relative flex justify-center text-sm">
-                    <span className="px-4 bg-white text-nylo-gray-500">ou</span>
+                    <span className="px-4 bg-nylo-card text-gray-400">ou</span>
                   </div>
                 </div>
 
@@ -72,27 +85,35 @@ const Index = () => {
                   <Input 
                     type="email" 
                     placeholder="seu@email.com"
-                    className="h-12 border-nylo-gray-200 focus:border-nylo-blue focus:ring-nylo-blue/20"
+                    className="h-12 glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary focus:ring-primary/20"
                   />
                   <Button 
                     onClick={handleEmailLogin}
                     disabled={isLoading}
-                    className="w-full h-12 gradient-blue hover:opacity-90 transition-all duration-300 nylo-shadow"
+                    className="w-full h-12 gradient-blue hover:opacity-90 transition-all duration-300 nylo-shadow text-white font-medium"
                   >
-                    {isLoading ? 'Entrando...' : 'Entrar com Email'}
+                    {isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        Entrando...
+                      </div>
+                    ) : (
+                      'Entrar com Email'
+                    )}
                   </Button>
                 </div>
               </div>
 
-              <div className="text-center space-y-2">
-                <p className="text-sm text-nylo-gray-500">
-                  Não tem conta? <span className="text-nylo-blue cursor-pointer hover:underline">Criar gratuitamente</span>
+              <div className="text-center space-y-3">
+                <p className="text-sm text-gray-400">
+                  Não tem conta? <span className="text-primary cursor-pointer hover:underline font-medium">Criar gratuitamente</span>
                 </p>
                 <Button 
                   variant="ghost" 
                   onClick={() => navigate('/learn')}
-                  className="text-nylo-blue hover:text-nylo-cyan hover:bg-nylo-blue/5"
+                  className="text-primary hover:text-primary-light hover:bg-primary/10 transition-colors"
                 >
+                  <Globe className="w-4 h-4 mr-2" />
                   Primeiro acesso? Aprenda Nylo →
                 </Button>
               </div>
@@ -100,24 +121,24 @@ const Index = () => {
           </Card>
 
           {/* Features */}
-          <div className="grid grid-cols-3 gap-4 text-center animate-fade-in">
-            <div className="space-y-2">
-              <div className="w-8 h-8 mx-auto bg-nylo-blue/10 rounded-lg flex items-center justify-center">
-                <div className="w-4 h-4 bg-nylo-blue rounded-sm"></div>
+          <div className="grid grid-cols-3 gap-6 text-center animate-fade-in">
+            <div className="space-y-3">
+              <div className="w-12 h-12 mx-auto glass-effect rounded-xl flex items-center justify-center border border-primary/30">
+                <div className="w-6 h-6 gradient-blue rounded-lg"></div>
               </div>
-              <p className="text-xs text-nylo-gray-600">Visual Builder</p>
+              <p className="text-sm text-gray-300 font-medium">Visual Builder</p>
             </div>
-            <div className="space-y-2">
-              <div className="w-8 h-8 mx-auto bg-nylo-cyan/10 rounded-lg flex items-center justify-center">
-                <div className="w-4 h-4 bg-nylo-cyan rounded-sm"></div>
+            <div className="space-y-3">
+              <div className="w-12 h-12 mx-auto glass-effect rounded-xl flex items-center justify-center border border-purple-500/30">
+                <Bot className="w-6 h-6 text-purple-400" />
               </div>
-              <p className="text-xs text-nylo-gray-600">NyloLang</p>
+              <p className="text-sm text-gray-300 font-medium">NyloLang</p>
             </div>
-            <div className="space-y-2">
-              <div className="w-8 h-8 mx-auto bg-nylo-blue/10 rounded-lg flex items-center justify-center">
-                <div className="w-4 h-4 bg-gradient-to-r from-nylo-blue to-nylo-cyan rounded-sm"></div>
+            <div className="space-y-3">
+              <div className="w-12 h-12 mx-auto glass-effect rounded-xl flex items-center justify-center border border-blue-500/30">
+                <Zap className="w-6 h-6 text-blue-400" />
               </div>
-              <p className="text-xs text-nylo-gray-600">Preview Live</p>
+              <p className="text-sm text-gray-300 font-medium">Preview Live</p>
             </div>
           </div>
         </div>

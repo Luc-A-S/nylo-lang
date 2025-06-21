@@ -27,7 +27,8 @@ export default {
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: '#356CFF',
-					light: '#71CFFF',
+					light: '#60A5FA',
+					dark: '#4F46E5',
 					foreground: '#FFFFFF'
 				},
 				secondary: {
@@ -56,8 +57,10 @@ export default {
 				},
 				nylo: {
 					blue: '#356CFF',
-					cyan: '#71CFFF',
-					black: '#111111',
+					purple: '#7C3AED',
+					dark: '#0B0B11',
+					darker: '#101018',
+					card: '#18182A',
 					white: '#FFFFFF',
 					gray: {
 						50: '#F8FAFC',
@@ -108,11 +111,15 @@ export default {
 				},
 				'wave': {
 					'0%, 100%': { transform: 'scale(1)' },
-					'50%': { transform: 'scale(1.1)' }
+					'50%': { transform: 'scale(1.05)' }
 				},
 				'gradient-wave': {
 					'0%, 100%': { backgroundPosition: '0% 50%' },
 					'50%': { backgroundPosition: '100% 50%' }
+				},
+				'glow-pulse': {
+					'0%, 100%': { boxShadow: '0 0 20px rgba(53, 108, 255, 0.4)' },
+					'50%': { boxShadow: '0 0 40px rgba(53, 108, 255, 0.8)' }
 				}
 			},
 			animation: {
@@ -121,7 +128,8 @@ export default {
 				'fade-in': 'fade-in 0.5s ease-out',
 				'slide-up': 'slide-up 0.6s ease-out',
 				'wave': 'wave 2s ease-in-out infinite',
-				'gradient-wave': 'gradient-wave 3s ease-in-out infinite'
+				'gradient-wave': 'gradient-wave 3s ease-in-out infinite',
+				'glow-pulse': 'glow-pulse 2s ease-in-out infinite'
 			}
 		}
 	},

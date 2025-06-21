@@ -5,35 +5,35 @@
 
 @layer base {
   :root {
-    --background: 255 255 255;
-    --foreground: 17 17 17;
+    --background: 11 11 17;
+    --foreground: 255 255 255;
 
-    --card: 255 255 255;
-    --card-foreground: 17 17 17;
+    --card: 16 16 24;
+    --card-foreground: 255 255 255;
 
-    --popover: 255 255 255;
-    --popover-foreground: 17 17 17;
+    --popover: 16 16 24;
+    --popover-foreground: 255 255 255;
 
     --primary: 53 108 255;
     --primary-foreground: 255 255 255;
 
-    --secondary: 248 250 252;
-    --secondary-foreground: 17 17 17;
+    --secondary: 24 24 35;
+    --secondary-foreground: 255 255 255;
 
-    --muted: 248 250 252;
-    --muted-foreground: 100 116 139;
+    --muted: 30 30 42;
+    --muted-foreground: 156 163 175;
 
-    --accent: 248 250 252;
-    --accent-foreground: 17 17 17;
+    --accent: 53 108 255;
+    --accent-foreground: 255 255 255;
 
     --destructive: 239 68 68;
     --destructive-foreground: 255 255 255;
 
-    --border: 226 232 240;
-    --input: 226 232 240;
+    --border: 42 42 56;
+    --input: 42 42 56;
     --ring: 53 108 255;
 
-    --radius: 8px;
+    --radius: 12px;
   }
 
   * {
@@ -43,25 +43,39 @@
   body {
     @apply bg-background text-foreground font-inter;
     font-feature-settings: "rlig" 1, "calt" 1;
+    background: linear-gradient(135deg, #0B0B11 0%, #1A1A2E 50%, #16213E 100%);
+    min-height: 100vh;
   }
 
   .gradient-blue {
-    background: linear-gradient(135deg, #356CFF 0%, #71CFFF 100%);
+    background: linear-gradient(135deg, #356CFF 0%, #4F46E5 50%, #7C3AED 100%);
   }
 
   .gradient-text {
-    background: linear-gradient(135deg, #356CFF 0%, #71CFFF 100%);
+    background: linear-gradient(135deg, #356CFF 0%, #60A5FA 50%, #A78BFA 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .nylo-shadow {
-    box-shadow: 0 4px 20px rgba(53, 108, 255, 0.15);
+    box-shadow: 0 8px 32px rgba(53, 108, 255, 0.3);
   }
 
   .nylo-glow {
-    box-shadow: 0 0 30px rgba(53, 108, 255, 0.3);
+    box-shadow: 0 0 40px rgba(53, 108, 255, 0.4);
+  }
+
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .card-dark {
+    background: linear-gradient(145deg, rgba(16, 16, 24, 0.8) 0%, rgba(30, 30, 42, 0.6) 100%);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(53, 108, 255, 0.2);
   }
 
   .scrollbar-hide {
@@ -70,5 +84,24 @@
   }
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Custom animations for tech landing pages */
+  .floating-animation {
+    animation: floating 6s ease-in-out infinite;
+  }
+
+  @keyframes floating {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+  }
+
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes pulse-glow {
+    from { box-shadow: 0 0 20px rgba(53, 108, 255, 0.4); }
+    to { box-shadow: 0 0 40px rgba(53, 108, 255, 0.8); }
   }
 }
