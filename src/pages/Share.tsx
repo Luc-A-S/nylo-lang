@@ -72,11 +72,11 @@ const Share = () => {
             <div className="flex items-center space-x-4">
               <Button 
                 variant="ghost" 
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate(`/editor/${chatbot.id}`)}
                 className="text-gray-400 hover:text-white hover:bg-white/10"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Dashboard
+                Editor
               </Button>
               <div>
                 <h1 className="text-lg font-semibold text-white">Compartilhar: {chatbot.name}</h1>
