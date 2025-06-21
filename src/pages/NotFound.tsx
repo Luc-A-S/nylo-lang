@@ -2,7 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Home, ArrowLeft, Bot } from "lucide-react";
+import { Home, Bot } from "lucide-react";
 
 const NotFound = () => {
   const navigate = useNavigate();
@@ -41,16 +41,6 @@ const NotFound = () => {
             <Home className="w-4 h-4 mr-2" />
             Ir para Dashboard
           </Button>
-          <div>
-            <Button 
-              variant="ghost" 
-              onClick={() => navigate('/')}
-              className="text-primary hover:text-primary-light hover:bg-primary/10"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Voltar ao Início
-            </Button>
-          </div>
         </div>
       </div>
     </div>

@@ -89,15 +89,6 @@ const Editor = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Button 
-                variant="ghost" 
-                onClick={() => navigate('/dashboard')}
-                className="text-gray-400 hover:text-white hover:bg-white/10"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Voltar
-              </Button>
-              <Separator orientation="vertical" className="h-6 bg-white/20" />
               <div>
                 <h1 className="text-lg font-semibold text-white">{chatbot.name}</h1>
                 <div className="flex items-center space-x-2">
