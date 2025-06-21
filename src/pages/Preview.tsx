@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useNylo } from '@/contexts/NyloContext';
@@ -5,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, RefreshCw, Share, Bot, Settings, Maximize2, Minimize2 } from 'lucide-react';
+import { RefreshCw, Share, Bot, Settings, Maximize2, Minimize2 } from 'lucide-react';
 
 interface ChatMessage {
   id: string;
@@ -203,14 +204,6 @@ const Preview = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Button 
-                variant="ghost" 
-                onClick={() => navigate(`/editor/${chatbot.id}`)}
-                className="text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Editor
-              </Button>
               <div>
                 <h1 className="text-lg font-semibold text-white">Preview: {chatbot.name}</h1>
                 <div className="flex items-center space-x-2">

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useNylo } from '@/contexts/NyloContext';
@@ -6,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Eye, Power, PowerOff, Save, Code, HelpCircle } from 'lucide-react';
+import { Eye, Power, PowerOff, Save, Code, HelpCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import CodeEditor from '@/components/CodeEditor';
 

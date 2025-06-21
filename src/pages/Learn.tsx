@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, BookOpen, Code, Zap, Share2, Sparkles } from 'lucide-react';
+import { BookOpen, Code, Zap, Share2, Sparkles } from 'lucide-react';
 
 const Learn = () => {
   const navigate = useNavigate();
@@ -288,14 +288,6 @@ fim`}</pre>
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Button 
-                variant="ghost" 
-                onClick={() => navigate('/')}
-                className="text-gray-400 hover:text-white hover:bg-white/10"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Voltar
-              </Button>
               <div>
                 <h1 className="text-lg font-semibold gradient-text">Aprenda Nylo</h1>
                 <p className="text-sm text-gray-400">Tutorial interativo passo-a-passo</p>
