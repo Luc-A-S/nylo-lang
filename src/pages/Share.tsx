@@ -72,11 +72,11 @@ const Share = () => {
             <div className="flex items-center space-x-4">
               <Button 
                 variant="ghost" 
-                onClick={() => navigate(`/editor/${chatbot.id}`)}
+                onClick={() => navigate('/dashboard')}
                 className="text-gray-400 hover:text-white hover:bg-white/10"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Editor
+                Dashboard
               </Button>
               <div>
                 <h1 className="text-lg font-semibold text-white">Compartilhar: {chatbot.name}</h1>
@@ -177,7 +177,7 @@ const Share = () => {
               <Button
                 onClick={() => {
                   const link = document.createElement('a');
-                  link.href = qrCodeUrl;
+                  link.href = qr CodeUrl;
                   link.download = `qr-code-${chatbot.name}.png`;
                   link.click();
                 }}

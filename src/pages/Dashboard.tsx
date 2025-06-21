@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Bot, Plus, Settings, BookOpen, Edit, Eye, Share, Zap } from 'lucide-react';
+import { Bot, Plus, BookOpen, Edit, Eye, Share, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Dashboard = () => {
@@ -30,6 +30,13 @@ const Dashboard = () => {
     setNewBotDescription('');
     toast.success('Chatbot criado com sucesso!');
     navigate(`/editor/${newBot.id}`);
+  };
+
+  const handleDeleteBot = (id: string, name: string) => {
+    if (window.confirm(`Tem certeza que deseja excluir o chatbot "${name}"? Esta ação não pode ser desfeita.`)) {
+      deleteChatbot(id);
+      toast.success('Chatbot excluído com sucesso!');
+    }
   };
 
   const formatDate = (date: Date) => {
@@ -54,7 +61,7 @@ const Dashboard = () => {
       <header className="relative z-10 border-b border-white/10 bg-black/20 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <div className="w-10 h-10 gradient-blue rounded-lg flex items-center justify-center pulse-glow">
+            <div className="w-10 h-10 gradient-blue rounded-lg flex items-center justify-center">
               <Bot className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -70,13 +77,6 @@ const Dashboard = () => {
             >
               <BookOpen className="w-4 h-4 mr-2" />
               Aprender Nylo
-            </Button>
-            <Button 
-              variant="outline" 
-              className="glass-effect border-white/20 text-white hover:bg-white/10"
-            >
-              <Settings className="w-4 h-4 mr-2" />
-              Configurações
             </Button>
           </div>
         </div>
@@ -150,7 +150,7 @@ const Dashboard = () => {
         {chatbots.length === 0 ? (
           <Card className="card-dark border-dashed border-2 border-white/20">
             <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="w-16 h-16 gradient-blue rounded-2xl flex items-center justify-center mb-4 pulse-glow">
+              <div className="w-16 h-16 gradient-blue rounded-2xl flex items-center justify-center mb-4">
                 <Bot className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-lg font-semibold text-white mb-2">
@@ -182,15 +182,25 @@ const Dashboard = () => {
                         {bot.description || 'Sem descrição'}
                       </p>
                     </div>
-                    <Badge 
-                      variant={bot.isOnline ? "default" : "secondary"}
-                      className={bot.isOnline 
-                        ? "bg-green-500/20 text-green-400 border-green-400/30" 
-                        : "bg-gray-500/20 text-gray-400 border-gray-400/30"
-                      }
-                    >
-                      {bot.isOnline ? 'Online' : 'Offline'}
-                    </Badge>
+                    <div className="flex items-center space-x-2">
+                      <Badge 
+                        variant={bot.isOnline ? "default" : "secondary"}
+                        className={bot.isOnline 
+                          ? "bg-green-500/20 text-green-400 border-green-400/30" 
+                          : "bg-gray-500/20 text-gray-400 border-gray-400/30"
+                        }
+                      >
+                        {bot.isOnline ? 'Online' : 'Offline'}
+                      </Badge>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleDeleteBot(bot.id, bot.name)}
+                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10 p-1 h-8 w-8"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Bot, Sparkles, Zap, Globe } from 'lucide-react';
+import { Bot, Zap, Globe } from 'lucide-react';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -37,11 +37,8 @@ const Index = () => {
           {/* Logo e Header */}
           <div className="text-center space-y-6">
             <div className="relative">
-              <div className="w-24 h-24 mx-auto gradient-blue rounded-3xl flex items-center justify-center nylo-glow pulse-glow">
+              <div className="w-24 h-24 mx-auto gradient-blue rounded-3xl flex items-center justify-center nylo-glow">
                 <Bot className="w-12 h-12 text-white" />
-              </div>
-              <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center animate-bounce">
-                <Sparkles className="w-4 h-4 text-white" />
               </div>
             </div>
             <div className="space-y-3">
