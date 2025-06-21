@@ -42,38 +42,6 @@ const Editor = () => {
     toast.success(`Chatbot ${newStatus ? 'ativado' : 'desativado'}!`);
   };
 
-  const nyloKeywords = ['mensagem', 'botao', 'fluxo', 'inicio', 'fim', 'ir_para'];
-  
-  const snippets = [
-    {
-      title: 'Mensagem Simples',
-      code: `mensagem:
-  "Olá! Como posso te ajudar?"`
-    },
-    {
-      title: 'Mensagem com Botões',
-      code: `mensagem:
-  "Escolha uma opção:"
-  botao 1:
-    "Opção A" -> fluxo_a
-  botao 2:
-    "Opção B" -> fluxo_b`
-    },
-    {
-      title: 'Novo Fluxo',
-      code: `fluxo nome_do_fluxo:
-  mensagem:
-    "Conteúdo do fluxo"`
-    },
-    {
-      title: 'Atendimento Humano',
-      code: `fluxo atendimento_humano:
-  mensagem:
-    "Conectando com atendente..."
-    "Por favor, informe seu nome:"`
-    }
-  ];
-
   if (!chatbot) {
     return <div>Carregando...</div>;
   }
@@ -176,15 +144,8 @@ const Editor = () => {
 
         {/* Sidebar */}
         <div className="w-80 border-l border-white/10 bg-black/20 backdrop-blur-sm">
-          <Tabs defaultValue="snippets" className="h-full">
+          <Tabs defaultValue="help" className="h-full">
             <TabsList className="w-full justify-start px-4 pt-4 bg-transparent">
-              <TabsTrigger 
-                value="snippets" 
-                className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary text-gray-400"
-              >
-                <Code className="w-4 h-4 mr-2" />
-                Snippets
-              </TabsTrigger>
               <TabsTrigger 
                 value="help"
                 className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary text-gray-400"
@@ -193,37 +154,6 @@ const Editor = () => {
                 Ajuda
               </TabsTrigger>
             </TabsList>
-            
-            <TabsContent value="snippets" className="px-4 pb-4 space-y-4">
-              <div>
-                <h3 className="font-semibold text-white mb-3">Código Pronto</h3>
-                <div className="space-y-3">
-                  {snippets.map((snippet, index) => (
-                    <Card key={index} className="card-dark cursor-pointer hover:bg-white/5 transition-colors">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-sm text-white">{snippet.title}</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <pre className="text-xs text-gray-400 bg-black/30 p-2 rounded overflow-x-auto">
-                          {snippet.code}
-                        </pre>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => {
-                            setSourceCode(prev => prev + '\n\n' + snippet.code);
-                            toast.success('Snippet adicionado!');
-                          }}
-                          className="w-full mt-2 text-primary hover:text-primary-light hover:bg-primary/10"
-                        >
-                          Inserir
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            </TabsContent>
             
             <TabsContent value="help" className="px-4 pb-4">
               <div className="space-y-4">
