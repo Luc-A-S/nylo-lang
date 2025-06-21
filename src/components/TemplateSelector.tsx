@@ -1,13 +1,13 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { templates, getTemplatesByCategory, Template } from '@/data/templates';
 import { ShoppingBag, Building2, HelpCircle, Eye } from 'lucide-react';
+import { useNylo } from '@/contexts/NyloContext';
+import { useNavigate } from 'react-router-dom';
 
 interface TemplateSelectorProps {
-  onSelectTemplate: (template: Template) => void;
   onClose: () => void;
 }
 
@@ -29,15 +29,18 @@ const categoryColors = {
   faq: 'bg-purple-500'
 };
 
-export const TemplateSelector = ({ onSelectTemplate, onClose }: TemplateSelectorProps) => {
+export const TemplateSelector = ({ onClose }: TemplateSelectorProps) => {
   const [selectedCategory, setSelectedCategory] = useState<'ecommerce' | 'empresa' | 'faq' | null>(null);
   const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
+  const { createChatbotFromTemplate } = useNylo();
+  const navigate = useNavigate();
 
   const categories = ['ecommerce', 'empresa', 'faq'] as const;
 
   const handleSelectTemplate = (template: Template) => {
-    onSelectTemplate(template);
+    const newBot = createChatbotFromTemplate(template);
     onClose();
+    navigate(`/editor/${newBot.id}`);
   };
 
   if (previewTemplate) {

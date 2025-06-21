@@ -1,5 +1,5 @@
-
 import { createContext, useContext, useState, ReactNode } from 'react';
+import { Template } from '@/data/templates';
 
 export interface ChatBot {
   id: string;
@@ -26,6 +26,7 @@ export interface ChatBot {
 interface NyloContextType {
   chatbots: ChatBot[];
   createChatbot: (name: string, description: string) => ChatBot;
+  createChatbotFromTemplate: (template: Template) => ChatBot;
   updateChatbot: (id: string, updates: Partial<ChatBot>) => void;
   deleteChatbot: (id: string) => void;
   getChatbot: (id: string) => ChatBot | undefined;
@@ -128,6 +129,28 @@ export const NyloProvider = ({ children }: { children: ReactNode }) => {
     return newBot;
   };
 
+  const createChatbotFromTemplate = (template: Template): ChatBot => {
+    const newBot: ChatBot = {
+      id: Date.now().toString(),
+      name: template.name,
+      description: template.description,
+      sourceCode: template.sourceCode,
+      isOnline: false,
+      lastUpdated: new Date(),
+      accessCount: 0,
+      todayAccessCount: 0,
+      accessHistory: [],
+      settings: {
+        brandingColor: '#356CFF',
+        businessName: template.name,
+        welcomeMessage: template.config.welcomeMessage
+      }
+    };
+
+    setChatbots(prev => [...prev, newBot]);
+    return newBot;
+  };
+
   const updateChatbot = (id: string, updates: Partial<ChatBot>) => {
     setChatbots(prev => prev.map(bot => 
       bot.id === id 
@@ -167,6 +190,7 @@ export const NyloProvider = ({ children }: { children: ReactNode }) => {
     <NyloContext.Provider value={{
       chatbots,
       createChatbot,
+      createChatbotFromTemplate,
       updateChatbot,
       deleteChatbot,
       getChatbot,
