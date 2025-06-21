@@ -1,15 +1,14 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useNylo } from '@/contexts/NyloContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Eye, Power, PowerOff, Save, Code, HelpCircle, Play } from 'lucide-react';
+import { ArrowLeft, Eye, Power, PowerOff, Save, Code, HelpCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import CodeEditor from '@/components/CodeEditor';
 
 const Editor = () => {
   const { id } = useParams();
@@ -17,7 +16,6 @@ const Editor = () => {
   const { getChatbot, updateChatbot } = useNylo();
   const [chatbot, setChatbot] = useState(getChatbot(id || ''));
   const [sourceCode, setSourceCode] = useState(chatbot?.sourceCode || '');
-  const [isPreviewMode, setIsPreviewMode] = useState(false);
 
   useEffect(() => {
     if (!chatbot) {
@@ -175,13 +173,11 @@ const Editor = () => {
             </div>
           </div>
           
-          <div className="flex-1 p-4">
-            <Textarea
+          <div className="flex-1">
+            <CodeEditor
               value={sourceCode}
-              onChange={(e) => setSourceCode(e.target.value)}
-              className="w-full h-full font-mono text-sm glass-effect border-white/20 text-white placeholder-gray-500 focus:border-primary resize-none"
-              placeholder="# Digite seu código NyloLang aqui..."
-              style={{ minHeight: '500px' }}
+              onChange={setSourceCode}
+              language="yaml"
             />
           </div>
         </div>
