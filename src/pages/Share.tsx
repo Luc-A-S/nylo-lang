@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useNylo } from '@/contexts/NyloContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Copy, ExternalLink, Download, Eye, BarChart3, Users, Calendar } from 'lucide-react';
+import { Copy, ExternalLink, Download, Eye, BarChart3, Users, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Share = () => {
@@ -70,14 +69,6 @@ const Share = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Button 
-                variant="ghost" 
-                onClick={() => navigate('/dashboard')}
-                className="text-gray-400 hover:text-white hover:bg-white/10"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Dashboard
-              </Button>
               <div>
                 <h1 className="text-lg font-semibold text-white">Compartilhar: {chatbot.name}</h1>
                 <p className="text-sm text-gray-400">Seu chatbot está pronto para ser compartilhado</p>
