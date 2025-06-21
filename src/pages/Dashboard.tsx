@@ -1,7 +1,7 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNylo } from '@/contexts/NyloContext';
+import { templates as templateData } from '@/data/templates';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -23,7 +23,7 @@ const Dashboard = () => {
 
   const templates = [
     {
-      id: 'ecommerce',
+      id: 'ecommerce-1',
       name: 'E-commerce',
       description: 'Atendimento para lojas online',
       icon: '🏪',
@@ -31,7 +31,7 @@ const Dashboard = () => {
       defaultName: 'Atendimento E-commerce'
     },
     {
-      id: 'empresa',
+      id: 'empresa-1',
       name: 'Empresa',
       description: 'Atendimento corporativo',
       icon: '🏢',
@@ -39,7 +39,7 @@ const Dashboard = () => {
       defaultName: 'Atendimento Empresarial'
     },
     {
-      id: 'faq',
+      id: 'faq-1',
       name: 'FAQ',
       description: 'Perguntas frequentes',
       icon: '❓',
@@ -78,7 +78,14 @@ const Dashboard = () => {
       return;
     }
 
-    const newBot = createChatbotFromTemplate(selectedTemplate, newBotName, newBotDescription);
+    // Find the template object from templateData
+    const templateObject = templateData.find(t => t.id === selectedTemplate);
+    if (!templateObject) {
+      toast.error('Template não encontrado');
+      return;
+    }
+
+    const newBot = createChatbotFromTemplate(templateObject, newBotName, newBotDescription);
     setIsTemplateDialogOpen(false);
     setNewBotName('');
     setNewBotDescription('');
