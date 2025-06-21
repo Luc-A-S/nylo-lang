@@ -16,8 +16,10 @@ export interface AccessHistoryDay {
 export interface Chatbot {
   id: string;
   name: string;
+  description?: string;
   isOnline: boolean;
   createdAt: Date;
+  lastUpdated: Date;
   sourceCode: string;
   settings: ChatbotSettings;
   publicLink?: string;
@@ -37,8 +39,8 @@ export interface Template {
 
 interface NyloContextType {
   chatbots: Chatbot[];
-  createChatbot: (name: string) => Chatbot;
-  createChatbotFromTemplate: (template: Template, customName?: string) => Chatbot;
+  createChatbot: (name: string, description?: string) => Chatbot;
+  createChatbotFromTemplate: (template: Template, customName?: string, description?: string) => Chatbot;
   updateChatbot: (id: string, updates: Partial<Chatbot>) => void;
   deleteChatbot: (id: string) => void;
   getChatbot: (id: string) => Chatbot | undefined;
@@ -62,12 +64,15 @@ interface NyloProviderProps {
 export const NyloProvider = ({ children }: NyloProviderProps) => {
   const [chatbots, setChatbots] = useState<Chatbot[]>([]);
 
-  const createChatbot = (name: string): Chatbot => {
+  const createChatbot = (name: string, description?: string): Chatbot => {
+    const now = new Date();
     const newChatbot: Chatbot = {
       id: Date.now().toString(),
       name,
+      description,
       isOnline: false,
-      createdAt: new Date(),
+      createdAt: now,
+      lastUpdated: now,
       sourceCode: `inicio:
   mensagem:
     "Olá! Como posso te ajudar?"
@@ -99,12 +104,15 @@ fim`,
     return newChatbot;
   };
 
-  const createChatbotFromTemplate = (template: Template, customName?: string): Chatbot => {
+  const createChatbotFromTemplate = (template: Template, customName?: string, description?: string): Chatbot => {
+    const now = new Date();
     const newChatbot: Chatbot = {
       id: Date.now().toString(),
       name: customName || template.name,
+      description: description || template.description,
       isOnline: false,
-      createdAt: new Date(),
+      createdAt: now,
+      lastUpdated: now,
       sourceCode: template.sourceCode,
       settings: {
         brandingColor: '#356CFF',
@@ -123,7 +131,7 @@ fim`,
   const updateChatbot = (id: string, updates: Partial<Chatbot>) => {
     setChatbots(prev => 
       prev.map(bot => 
-        bot.id === id ? { ...bot, ...updates } : bot
+        bot.id === id ? { ...bot, ...updates, lastUpdated: new Date() } : bot
       )
     );
   };
