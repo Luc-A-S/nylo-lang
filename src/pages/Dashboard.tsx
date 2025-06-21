@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNylo } from '@/contexts/NyloContext';
@@ -5,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Bot, Plus, BookOpen, Edit, Eye, Share, Trash2, LogOut, BarChart3 } from 'lucide-react';
@@ -32,10 +34,8 @@ const Dashboard = () => {
   };
 
   const handleDeleteBot = (id: string, name: string) => {
-    if (window.confirm(`Tem certeza que deseja excluir o chatbot "${name}"? Esta ação não pode ser desfeita.`)) {
-      deleteChatbot(id);
-      toast.success('Chatbot excluído com sucesso!');
-    }
+    deleteChatbot(id);
+    toast.success('Chatbot excluído com sucesso!');
   };
 
   const handleLogout = () => {
@@ -206,14 +206,44 @@ const Dashboard = () => {
                       >
                         {bot.isOnline ? 'Online' : 'Offline'}
                       </Badge>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleDeleteBot(bot.id, bot.name)}
-                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10 p-1 h-8 w-8"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10 p-1 h-8 w-8"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="card-dark border-red-500/30 nylo-shadow max-w-md">
+                          <AlertDialogHeader>
+                            <AlertDialogTitle className="text-white text-lg flex items-center gap-3">
+                              <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
+                                <Trash2 className="w-5 h-5 text-red-400" />
+                              </div>
+                              Excluir Chatbot
+                            </AlertDialogTitle>
+                            <AlertDialogDescription className="text-gray-300 leading-relaxed">
+                              Tem certeza que deseja excluir o chatbot <span className="font-semibold text-white">"{bot.name}"</span>?
+                              <br /><br />
+                              <span className="text-red-400 font-medium">Esta ação não pode ser desfeita.</span>
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter className="gap-3">
+                            <AlertDialogCancel className="glass-effect border-white/20 text-white hover:bg-white/10">
+                              Cancelar
+                            </AlertDialogCancel>
+                            <AlertDialogAction 
+                              onClick={() => handleDeleteBot(bot.id, bot.name)}
+                              className="bg-red-500 hover:bg-red-600 text-white border-0"
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Sim, excluir
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </div>
                 </CardHeader>
