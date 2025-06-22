@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNylo } from '@/contexts/NyloContext';
@@ -118,61 +119,62 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-nylo-dark via-nylo-darker to-nylo-card">
       {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-full blur-3xl floating-animation"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-blue-500/20 to-primary/20 rounded-full blur-3xl floating-animation" style={{animationDelay: '-3s'}}></div>
+        <div className="absolute top-1/4 left-1/4 w-48 h-48 md:w-96 md:h-96 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-full blur-3xl floating-animation"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-32 h-32 md:w-80 md:h-80 bg-gradient-to-r from-blue-500/20 to-primary/20 rounded-full blur-3xl floating-animation" style={{animationDelay: '-3s'}}></div>
       </div>
 
       <header className="relative z-10 border-b border-white/10 bg-black/20 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="w-10 h-10 gradient-blue rounded-lg flex items-center justify-center">
-              <Bot className="w-6 h-6 text-white" />
+        <div className="container mx-auto px-4 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center space-x-3 md:space-x-4">
+            <div className="w-8 h-8 md:w-10 md:h-10 gradient-blue rounded-lg flex items-center justify-center">
+              <Bot className="w-4 h-4 md:w-6 md:h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-white">Dashboard</h1>
-              <p className="text-sm text-gray-400">Gerencie seus chatbots</p>
+              <h1 className="text-lg md:text-xl font-semibold text-white">Dashboard</h1>
+              <p className="text-xs md:text-sm text-gray-400">Gerencie seus chatbots</p>
             </div>
           </div>
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 md:space-x-3 w-full sm:w-auto">
             <Button 
               variant="ghost" 
               onClick={() => navigate('/learn')}
-              className="text-primary hover:text-primary-light hover:bg-primary/10"
+              className="text-primary hover:text-primary-light hover:bg-primary/10 text-xs md:text-sm px-2 md:px-4 h-8 md:h-10"
             >
-              <BookOpen className="w-4 h-4 mr-2" />
-              Aprender Nylo
+              <BookOpen className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+              <span className="hidden sm:inline">Aprender Nylo</span>
+              <span className="sm:hidden">Aprender</span>
             </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button 
                   variant="ghost" 
-                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10 text-xs md:text-sm px-2 md:px-4 h-8 md:h-10"
                 >
-                  <LogOut className="w-4 h-4 mr-2" />
+                  <LogOut className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
                   Sair
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent className="card-dark border-red-500/30 nylo-shadow max-w-md">
+              <AlertDialogContent className="card-dark border-red-500/30 nylo-shadow max-w-md mx-4">
                 <AlertDialogHeader>
-                  <AlertDialogTitle className="text-white text-lg flex items-center gap-3">
-                    <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
-                      <LogOut className="w-5 h-5 text-red-400" />
+                  <AlertDialogTitle className="text-white text-base md:text-lg flex items-center gap-3">
+                    <div className="w-8 h-8 md:w-10 md:h-10 bg-red-500/20 rounded-full flex items-center justify-center">
+                      <LogOut className="w-4 h-4 md:w-5 md:h-5 text-red-400" />
                     </div>
                     Sair da Plataforma
                   </AlertDialogTitle>
-                  <AlertDialogDescription className="text-gray-300 leading-relaxed">
+                  <AlertDialogDescription className="text-gray-300 leading-relaxed text-sm md:text-base">
                     Tem certeza que deseja sair da plataforma Nylo?
                     <br /><br />
                     <span className="text-gray-400">Você precisará fazer login novamente para acessar seus chatbots.</span>
                   </AlertDialogDescription>
                 </AlertDialogHeader>
-                <AlertDialogFooter className="gap-3">
-                  <AlertDialogCancel className="glass-effect border-white/20 text-white hover:bg-white/10">
+                <AlertDialogFooter className="gap-3 flex-col sm:flex-row">
+                  <AlertDialogCancel className="glass-effect border-white/20 text-white hover:bg-white/10 w-full sm:w-auto">
                     Cancelar
                   </AlertDialogCancel>
                   <AlertDialogAction 
                     onClick={handleLogout}
-                    className="bg-red-500 hover:bg-red-600 text-white border-0"
+                    className="bg-red-500 hover:bg-red-600 text-white border-0 w-full sm:w-auto"
                   >
                     <LogOut className="w-4 h-4 mr-2" />
                     Sim, sair
@@ -185,25 +187,25 @@ const Dashboard = () => {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 relative z-10">
-        <div className="flex items-center justify-between mb-8">
+      <main className="container mx-auto px-4 py-6 md:py-8 relative z-10">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 md:mb-8 gap-4">
           <div>
-            <h2 className="text-2xl font-semibold text-white mb-2">Meus Chatbots</h2>
-            <p className="text-gray-400">
+            <h2 className="text-xl md:text-2xl font-semibold text-white mb-2">Meus Chatbots</h2>
+            <p className="text-sm md:text-base text-gray-400">
               {chatbots.length} {chatbots.length === 1 ? 'chatbot criado' : 'chatbots criados'}
             </p>
           </div>
           
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="gradient-blue hover:opacity-90 nylo-shadow">
+              <Button className="gradient-blue hover:opacity-90 nylo-shadow text-sm md:text-base px-4 md:px-6 h-10 md:h-12 w-full sm:w-auto">
                 <Plus className="w-4 h-4 mr-2" />
                 Novo Chatbot
               </Button>
             </DialogTrigger>
-            <DialogContent className="card-dark border-primary/30 nylo-shadow text-white">
+            <DialogContent className="card-dark border-primary/30 nylo-shadow text-white mx-4 max-w-md">
               <DialogHeader>
-                <DialogTitle className="gradient-text">Criar Novo Chatbot</DialogTitle>
+                <DialogTitle className="gradient-text text-lg md:text-xl">Criar Novo Chatbot</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
@@ -228,7 +230,7 @@ const Dashboard = () => {
                     className="glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary min-h-[80px]"
                   />
                 </div>
-                <div className="flex space-x-3 pt-4">
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 pt-4">
                   <Button 
                     variant="outline" 
                     onClick={() => setIsCreateDialogOpen(false)}
@@ -251,19 +253,19 @@ const Dashboard = () => {
         {/* Chatbots Grid */}
         {chatbots.length === 0 ? (
           <Card className="card-dark border-dashed border-2 border-white/20">
-            <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="w-16 h-16 gradient-blue rounded-2xl flex items-center justify-center mb-4">
-                <Bot className="w-8 h-8 text-white" />
+            <CardContent className="flex flex-col items-center justify-center py-12 md:py-16 text-center px-4">
+              <div className="w-12 h-12 md:w-16 md:h-16 gradient-blue rounded-2xl flex items-center justify-center mb-4">
+                <Bot className="w-6 h-6 md:w-8 md:h-8 text-white" />
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">
+              <h3 className="text-base md:text-lg font-semibold text-white mb-2">
                 Nenhum chatbot criado ainda
               </h3>
-              <p className="text-gray-400 mb-6 max-w-sm">
+              <p className="text-sm md:text-base text-gray-400 mb-6 max-w-sm">
                 Crie seu primeiro chatbot e comece a automatizar o atendimento do seu negócio
               </p>
               <Button 
                 onClick={() => setIsCreateDialogOpen(true)}
-                className="gradient-blue hover:opacity-90 nylo-shadow"
+                className="gradient-blue hover:opacity-90 nylo-shadow w-full sm:w-auto"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Criar Primeiro Chatbot
@@ -271,26 +273,26 @@ const Dashboard = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
             {chatbots.map((bot) => (
               <Card key={bot.id} className="card-dark border-0 nylo-shadow hover:scale-[1.02] transition-all duration-300 group">
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg text-white group-hover:text-primary transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <CardTitle className="text-base md:text-lg text-white group-hover:text-primary transition-colors truncate">
                         {bot.name}
                       </CardTitle>
-                      <p className="text-sm text-gray-400 mt-1 line-clamp-2">
+                      <p className="text-xs md:text-sm text-gray-400 mt-1 line-clamp-2">
                         {bot.description || 'Sem descrição'}
                       </p>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 ml-2">
                       <Badge 
                         variant={bot.isOnline ? "default" : "secondary"}
-                        className={bot.isOnline 
+                        className={`text-xs ${bot.isOnline 
                           ? "bg-green-500/20 text-green-400 border-green-400/30" 
                           : "bg-gray-500/20 text-gray-400 border-gray-400/30"
-                        }
+                        }`}
                       >
                         {bot.isOnline ? 'Online' : 'Offline'}
                       </Badge>
@@ -299,32 +301,32 @@ const Dashboard = () => {
                           <Button
                             size="sm"
                             variant="ghost"
-                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10 p-1 h-8 w-8"
+                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10 p-1 h-6 w-6 md:h-8 md:w-8"
                           >
                             <Trash2 className="w-3 h-3" />
                           </Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent className="card-dark border-red-500/30 nylo-shadow max-w-md">
+                        <AlertDialogContent className="card-dark border-red-500/30 nylo-shadow max-w-md mx-4">
                           <AlertDialogHeader>
-                            <AlertDialogTitle className="text-white text-lg flex items-center gap-3">
-                              <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
-                                <Trash2 className="w-5 h-5 text-red-400" />
+                            <AlertDialogTitle className="text-white text-base md:text-lg flex items-center gap-3">
+                              <div className="w-8 h-8 md:w-10 md:h-10 bg-red-500/20 rounded-full flex items-center justify-center">
+                                <Trash2 className="w-4 h-4 md:w-5 md:h-5 text-red-400" />
                               </div>
                               Excluir Chatbot
                             </AlertDialogTitle>
-                            <AlertDialogDescription className="text-gray-300 leading-relaxed">
+                            <AlertDialogDescription className="text-gray-300 leading-relaxed text-sm md:text-base">
                               Tem certeza que deseja excluir o chatbot <span className="font-semibold text-white">"{bot.name}"</span>?
                               <br /><br />
                               <span className="text-red-400 font-medium">Esta ação não pode ser desfeita.</span>
                             </AlertDialogDescription>
                           </AlertDialogHeader>
-                          <AlertDialogFooter className="gap-3">
-                            <AlertDialogCancel className="glass-effect border-white/20 text-white hover:bg-white/10">
+                          <AlertDialogFooter className="gap-3 flex-col sm:flex-row">
+                            <AlertDialogCancel className="glass-effect border-white/20 text-white hover:bg-white/10 w-full sm:w-auto">
                               Cancelar
                             </AlertDialogCancel>
                             <AlertDialogAction 
                               onClick={() => handleDeleteBot(bot.id, bot.name)}
-                              className="bg-red-500 hover:bg-red-600 text-white border-0"
+                              className="bg-red-500 hover:bg-red-600 text-white border-0 w-full sm:w-auto"
                             >
                               <Trash2 className="w-4 h-4 mr-2" />
                               Sim, excluir
@@ -336,7 +338,7 @@ const Dashboard = () => {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="text-sm text-gray-500">
+                  <div className="text-xs md:text-sm text-gray-500">
                     Última atualização: {formatDate(bot.lastUpdated)}
                   </div>
 
@@ -348,7 +350,7 @@ const Dashboard = () => {
                     <span>Hoje: {bot.todayAccessCount || 0}</span>
                   </div>
                   
-                  <div className="flex space-x-2">
+                  <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                     <Button 
                       size="sm" 
                       onClick={() => navigate(`/editor/${bot.id}`)}
@@ -386,22 +388,22 @@ const Dashboard = () => {
         )}
 
         {/* Templates Section */}
-        <div className="mt-16">
-          <h3 className="text-xl font-semibold text-white mb-6">Templates Prontos</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="mt-12 md:mt-16">
+          <h3 className="text-lg md:text-xl font-semibold text-white mb-4 md:mb-6">Templates Prontos</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {templates.map((template) => (
               <Card 
                 key={template.id}
                 className="card-dark border-white/20 hover:border-primary/40 transition-all duration-300 cursor-pointer group hover:scale-[1.02]"
                 onClick={() => handleTemplateSelect(template.id)}
               >
-                <CardContent className="p-6 text-center">
-                  <div className={`w-12 h-12 ${template.color} rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>
-                    <span className="text-white font-bold text-xl">{template.icon}</span>
+                <CardContent className="p-4 md:p-6 text-center">
+                  <div className={`w-10 h-10 md:w-12 md:h-12 ${template.color} rounded-xl flex items-center justify-center mx-auto mb-3 md:mb-4 group-hover:scale-110 transition-transform`}>
+                    <span className="text-white font-bold text-lg md:text-xl">{template.icon}</span>
                   </div>
-                  <h4 className="font-semibold text-white mb-2">{template.name}</h4>
-                  <p className="text-sm text-gray-400 mb-4">{template.description}</p>
-                  <Button className="w-full gradient-blue hover:opacity-90 transition-opacity">
+                  <h4 className="font-semibold text-white mb-2 text-sm md:text-base">{template.name}</h4>
+                  <p className="text-xs md:text-sm text-gray-400 mb-3 md:mb-4">{template.description}</p>
+                  <Button className="w-full gradient-blue hover:opacity-90 transition-opacity text-xs md:text-sm">
                     Usar Template
                   </Button>
                 </CardContent>
@@ -412,9 +414,9 @@ const Dashboard = () => {
 
         {/* Template Dialog */}
         <Dialog open={isTemplateDialogOpen} onOpenChange={setIsTemplateDialogOpen}>
-          <DialogContent className="card-dark border-primary/30 nylo-shadow text-white">
+          <DialogContent className="card-dark border-primary/30 nylo-shadow text-white mx-4 max-w-md">
             <DialogHeader>
-              <DialogTitle className="gradient-text">
+              <DialogTitle className="gradient-text text-lg md:text-xl">
                 Criar Chatbot com Template {templates.find(t => t.id === selectedTemplate)?.name}
               </DialogTitle>
             </DialogHeader>
@@ -441,7 +443,7 @@ const Dashboard = () => {
                   className="glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary min-h-[80px]"
                 />
               </div>
-              <div className="flex space-x-3 pt-4">
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 pt-4">
                 <Button 
                   variant="outline" 
                   onClick={() => setIsTemplateDialogOpen(false)}

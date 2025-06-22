@@ -196,16 +196,16 @@ const Preview = () => {
     <div className={`min-h-screen bg-gradient-to-br from-nylo-dark via-nylo-darker to-nylo-card ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}>
       {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-1/4 left-1/4 w-48 h-48 md:w-96 md:h-96 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
       </div>
 
       {/* Header */}
       <header className="relative z-10 border-b border-white/10 bg-black/20 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center space-x-3 md:space-x-4">
               <div>
-                <h1 className="text-lg font-semibold text-white">Preview: {chatbot.name}</h1>
+                <h1 className="text-base md:text-lg font-semibold text-white truncate">Preview: {chatbot.name}</h1>
                 <div className="flex items-center space-x-2">
                   <Badge 
                     variant="outline" 
@@ -225,36 +225,37 @@ const Preview = () => {
               </div>
             </div>
             
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2 md:space-x-3 w-full sm:w-auto overflow-x-auto">
               <Button 
                 variant="outline" 
                 onClick={() => setIsFullscreen(!isFullscreen)}
-                className="glass-effect border-white/20 text-white hover:bg-white/10 transition-all"
+                className="glass-effect border-white/20 text-white hover:bg-white/10 transition-all text-xs md:text-sm px-2 md:px-4 h-8 md:h-10 whitespace-nowrap"
               >
-                {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                {isFullscreen ? <Minimize2 className="w-3 h-3 md:w-4 md:h-4" /> : <Maximize2 className="w-3 h-3 md:w-4 md:h-4" />}
+                <span className="hidden sm:inline ml-2">{isFullscreen ? 'Sair' : 'Expandir'}</span>
               </Button>
               <Button 
                 variant="outline" 
                 onClick={handleRestart}
-                className="glass-effect border-white/20 text-white hover:bg-white/10 transition-all"
+                className="glass-effect border-white/20 text-white hover:bg-white/10 transition-all text-xs md:text-sm px-2 md:px-4 h-8 md:h-10 whitespace-nowrap"
               >
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Reiniciar
+                <RefreshCw className="w-3 h-3 md:w-4 md:h-4" />
+                <span className="hidden sm:inline ml-2">Reiniciar</span>
               </Button>
               <Button 
                 variant="outline" 
                 onClick={() => navigate(`/settings/${chatbot.id}`)}
-                className="glass-effect border-white/20 text-white hover:bg-white/10 transition-all"
+                className="glass-effect border-white/20 text-white hover:bg-white/10 transition-all text-xs md:text-sm px-2 md:px-4 h-8 md:h-10 whitespace-nowrap"
               >
-                <Settings className="w-4 h-4 mr-2" />
-                Configurações
+                <Settings className="w-3 h-3 md:w-4 md:h-4" />
+                <span className="hidden sm:inline ml-2">Config</span>
               </Button>
               <Button 
                 onClick={handleGenerateLink}
-                className="gradient-blue hover:opacity-90 nylo-shadow transition-all"
+                className="gradient-blue hover:opacity-90 nylo-shadow transition-all text-xs md:text-sm px-2 md:px-4 h-8 md:h-10 whitespace-nowrap"
               >
-                <Share className="w-4 h-4 mr-2" />
-                Compartilhar
+                <Share className="w-3 h-3 md:w-4 md:h-4" />
+                <span className="hidden sm:inline ml-2">Compartilhar</span>
               </Button>
             </div>
           </div>
@@ -262,22 +263,22 @@ const Preview = () => {
       </header>
 
       {/* Chat Interface */}
-      <div className={`container mx-auto px-4 py-8 relative z-10 ${isFullscreen ? 'max-w-none h-full' : 'max-w-4xl'}`}>
-        <Card className={`card-dark border-0 nylo-shadow overflow-hidden transition-all duration-300 ${isFullscreen ? 'h-[calc(100vh-160px)]' : 'h-[600px]'}`}>
+      <div className={`container mx-auto px-4 py-4 md:py-8 relative z-10 ${isFullscreen ? 'max-w-none h-full' : 'max-w-4xl'}`}>
+        <Card className={`card-dark border-0 nylo-shadow overflow-hidden transition-all duration-300 ${isFullscreen ? 'h-[calc(100vh-120px)] md:h-[calc(100vh-160px)]' : 'h-[500px] md:h-[600px]'}`}>
           {/* Chat Header */}
           <div 
-            className="p-4 text-white transition-colors duration-300"
+            className="p-3 md:p-4 text-white transition-colors duration-300"
             style={{ background: `linear-gradient(135deg, ${chatbot.settings.brandingColor}, ${chatbot.settings.brandingColor}dd)` }}
           >
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
-                <Bot className="w-6 h-6" />
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
+                <Bot className="w-4 h-4 md:w-6 md:h-6" />
               </div>
-              <div>
-                <h3 className="font-semibold">{chatbot.settings.businessName}</h3>
-                <div className="flex items-center space-x-2 text-sm text-white/80">
+              <div className="min-w-0 flex-1">
+                <h3 className="font-semibold text-sm md:text-base truncate">{chatbot.settings.businessName}</h3>
+                <div className="flex items-center space-x-2 text-xs md:text-sm text-white/80">
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                  <span>Online • Respondendo em segundos</span>
+                  <span className="truncate">Online • Respondendo em segundos</span>
                 </div>
               </div>
             </div>
@@ -285,7 +286,7 @@ const Preview = () => {
 
           {/* Messages */}
           <div 
-            className={`flex-1 p-4 space-y-4 overflow-y-auto scroll-smooth ${isFullscreen ? 'h-[calc(100vh-300px)]' : 'h-[480px]'}`}
+            className={`flex-1 p-3 md:p-4 space-y-3 md:space-y-4 overflow-y-auto scroll-smooth ${isFullscreen ? 'h-[calc(100vh-240px)] md:h-[calc(100vh-300px)]' : 'h-[380px] md:h-[480px]'}`}
             style={{ 
               scrollbarWidth: 'thin',
               scrollbarColor: `${chatbot.settings.brandingColor}30 transparent`
@@ -298,7 +299,7 @@ const Preview = () => {
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div
-                  className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl transition-all duration-300 hover:scale-[1.02] ${
+                  className={`max-w-[85%] sm:max-w-xs lg:max-w-md px-3 md:px-4 py-2 md:py-3 rounded-2xl transition-all duration-300 hover:scale-[1.02] ${
                     message.isBot
                       ? 'bg-gradient-to-r from-gray-700 to-gray-600 text-white shadow-lg'
                       : 'text-white shadow-lg'
@@ -307,23 +308,23 @@ const Preview = () => {
                     background: `linear-gradient(135deg, ${chatbot.settings.brandingColor}, ${chatbot.settings.brandingColor}dd)`
                   } : {}}
                 >
-                  <p className="text-sm whitespace-pre-line leading-relaxed">{message.text}</p>
+                  <p className="text-xs md:text-sm whitespace-pre-line leading-relaxed">{message.text}</p>
                   {message.buttons && (
-                    <div className="mt-3 space-y-2">
+                    <div className="mt-2 md:mt-3 space-y-1 md:space-y-2">
                       {message.buttons.map((button, buttonIndex) => (
                         <Button
                           key={buttonIndex}
                           size="sm"
                           variant="outline"
                           onClick={() => handleButtonClick(button.action)}
-                          className="w-full text-left border-primary/20 text-primary hover:bg-primary hover:text-white transition-all duration-300 hover:scale-105"
+                          className="w-full text-left border-primary/20 text-primary hover:bg-primary hover:text-white transition-all duration-300 hover:scale-105 text-xs md:text-sm h-8 md:h-auto"
                         >
                           {button.text}
                         </Button>
                       ))}
                     </div>
                   )}
-                  <p className="text-xs text-gray-400 mt-2 opacity-70">
+                  <p className="text-xs text-gray-400 mt-1 md:mt-2 opacity-70">
                     {message.timestamp.toLocaleTimeString('pt-BR', { 
                       hour: '2-digit', 
                       minute: '2-digit' 
@@ -337,19 +338,19 @@ const Preview = () => {
 
           {/* Input */}
           {isWaitingForName && (
-            <div className="p-4 border-t border-white/10 bg-black/10">
+            <div className="p-3 md:p-4 border-t border-white/10 bg-black/10">
               <div className="flex space-x-2">
                 <Input
                   value={userInput}
                   onChange={(e) => setUserInput(e.target.value)}
                   placeholder="Digite seu nome..."
                   onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  className="glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary transition-all duration-300"
+                  className="glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary transition-all duration-300 text-sm md:text-base"
                 />
                 <Button
                   onClick={handleSendMessage}
                   disabled={!userInput.trim()}
-                  className="transition-all duration-300 hover:scale-105"
+                  className="transition-all duration-300 hover:scale-105 text-sm md:text-base px-3 md:px-4"
                   style={{ 
                     background: `linear-gradient(135deg, ${chatbot.settings.brandingColor}, ${chatbot.settings.brandingColor}dd)` 
                   }}
@@ -366,18 +367,18 @@ const Preview = () => {
 
         {/* Stats */}
         {!isFullscreen && (
-          <div className="mt-6 grid grid-cols-3 gap-4 text-center">
-            <Card className="card-dark border-0 p-4">
-              <p className="text-2xl font-bold text-primary">{messages.length}</p>
-              <p className="text-sm text-gray-400">Mensagens</p>
+          <div className="mt-4 md:mt-6 grid grid-cols-3 gap-3 md:gap-4 text-center">
+            <Card className="card-dark border-0 p-3 md:p-4">
+              <p className="text-lg md:text-2xl font-bold text-primary">{messages.length}</p>
+              <p className="text-xs md:text-sm text-gray-400">Mensagens</p>
             </Card>
-            <Card className="card-dark border-0 p-4">
-              <p className="text-2xl font-bold text-green-400">{messages.filter(m => !m.isBot).length}</p>
-              <p className="text-sm text-gray-400">Respostas do Usuário</p>
+            <Card className="card-dark border-0 p-3 md:p-4">
+              <p className="text-lg md:text-2xl font-bold text-green-400">{messages.filter(m => !m.isBot).length}</p>
+              <p className="text-xs md:text-sm text-gray-400">Respostas</p>
             </Card>
-            <Card className="card-dark border-0 p-4">
-              <p className="text-2xl font-bold text-blue-400">{currentFlow}</p>
-              <p className="text-sm text-gray-400">Fluxo Atual</p>
+            <Card className="card-dark border-0 p-3 md:p-4">
+              <p className="text-lg md:text-2xl font-bold text-blue-400 truncate">{currentFlow}</p>
+              <p className="text-xs md:text-sm text-gray-400">Fluxo Atual</p>
             </Card>
           </div>
         )}
