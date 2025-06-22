@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useNylo } from '@/contexts/NyloContext';
@@ -12,6 +11,7 @@ import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { 
   ArrowLeft, 
   Save, 
@@ -72,12 +72,9 @@ const Settings = () => {
   const handleDelete = () => {
     if (!chatbot) return;
     
-    const confirmed = window.confirm('Tem certeza que deseja excluir este chatbot? Esta ação não pode ser desfeita.');
-    if (confirmed) {
-      deleteChatbot(chatbot.id);
-      toast.success('Chatbot excluído com sucesso!');
-      navigate('/dashboard');
-    }
+    deleteChatbot(chatbot.id);
+    toast.success('Chatbot excluído com sucesso!');
+    navigate('/dashboard');
   };
 
   const handleCopyLink = () => {
@@ -349,14 +346,44 @@ const Settings = () => {
                     <h3 className="font-medium text-white text-sm md:text-base">Excluir Chatbot</h3>
                     <p className="text-xs md:text-sm text-gray-400">Esta ação não pode ser desfeita</p>
                   </div>
-                  <Button
-                    variant="outline"
-                    onClick={handleDelete}
-                    className="border-red-500/30 text-red-400 hover:bg-red-500/10 text-xs md:text-sm w-full sm:w-auto"
-                  >
-                    <Trash2 className="w-3 h-3 md:w-4 md:h-4 mr-2" />
-                    Excluir
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="border-red-500/30 text-red-400 hover:bg-red-500/10 text-xs md:text-sm w-full sm:w-auto"
+                      >
+                        <Trash2 className="w-3 h-3 md:w-4 md:h-4 mr-2" />
+                        Excluir
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="card-dark border-red-500/30 nylo-shadow w-[90vw] max-w-md mx-auto">
+                      <AlertDialogHeader className="text-left">
+                        <AlertDialogTitle className="text-white text-lg md:text-xl flex items-center gap-3">
+                          <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                            <Trash2 className="w-5 h-5 text-red-400" />
+                          </div>
+                          <span className="min-w-0">Excluir Chatbot</span>
+                        </AlertDialogTitle>
+                        <AlertDialogDescription className="text-gray-300 leading-relaxed text-sm md:text-base pt-2">
+                          Tem certeza que deseja excluir o chatbot <span className="font-semibold text-white">"{chatbot.name}"</span>?
+                          <br /><br />
+                          <span className="text-red-400 font-medium">Esta ação não pode ser desfeita.</span>
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter className="flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 pt-4">
+                        <AlertDialogCancel className="glass-effect border-white/20 text-white hover:bg-white/10 w-full sm:w-auto order-2 sm:order-1">
+                          Cancelar
+                        </AlertDialogCancel>
+                        <AlertDialogAction 
+                          onClick={handleDelete}
+                          className="bg-red-500 hover:bg-red-600 text-white border-0 w-full sm:w-auto order-1 sm:order-2"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Sim, excluir
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </CardContent>
             </Card>

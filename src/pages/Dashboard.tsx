@@ -154,27 +154,27 @@ const Dashboard = () => {
                   Sair
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent className="card-dark border-red-500/30 nylo-shadow max-w-md mx-4">
-                <AlertDialogHeader>
-                  <AlertDialogTitle className="text-white text-base md:text-lg flex items-center gap-3">
-                    <div className="w-8 h-8 md:w-10 md:h-10 bg-red-500/20 rounded-full flex items-center justify-center">
-                      <LogOut className="w-4 h-4 md:w-5 md:h-5 text-red-400" />
+              <AlertDialogContent className="card-dark border-red-500/30 nylo-shadow w-[90vw] max-w-md mx-auto">
+                <AlertDialogHeader className="text-left">
+                  <AlertDialogTitle className="text-white text-lg md:text-xl flex items-center gap-3">
+                    <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                      <LogOut className="w-5 h-5 text-red-400" />
                     </div>
-                    Sair da Plataforma
+                    <span className="min-w-0">Sair da Plataforma</span>
                   </AlertDialogTitle>
-                  <AlertDialogDescription className="text-gray-300 leading-relaxed text-sm md:text-base">
+                  <AlertDialogDescription className="text-gray-300 leading-relaxed text-sm md:text-base pt-2">
                     Tem certeza que deseja sair da plataforma Nylo?
                     <br /><br />
                     <span className="text-gray-400">Você precisará fazer login novamente para acessar seus chatbots.</span>
                   </AlertDialogDescription>
                 </AlertDialogHeader>
-                <AlertDialogFooter className="gap-3 flex-col sm:flex-row">
-                  <AlertDialogCancel className="glass-effect border-white/20 text-white hover:bg-white/10 w-full sm:w-auto">
+                <AlertDialogFooter className="flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 pt-4">
+                  <AlertDialogCancel className="glass-effect border-white/20 text-white hover:bg-white/10 w-full sm:w-auto order-2 sm:order-1">
                     Cancelar
                   </AlertDialogCancel>
                   <AlertDialogAction 
                     onClick={handleLogout}
-                    className="bg-red-500 hover:bg-red-600 text-white border-0 w-full sm:w-auto"
+                    className="bg-red-500 hover:bg-red-600 text-white border-0 w-full sm:w-auto order-1 sm:order-2"
                   >
                     <LogOut className="w-4 h-4 mr-2" />
                     Sim, sair
@@ -203,7 +203,7 @@ const Dashboard = () => {
                 Novo Chatbot
               </Button>
             </DialogTrigger>
-            <DialogContent className="card-dark border-primary/30 nylo-shadow text-white mx-4 max-w-md">
+            <DialogContent className="card-dark border-primary/30 nylo-shadow text-white w-[90vw] max-w-md mx-auto">
               <DialogHeader>
                 <DialogTitle className="gradient-text text-lg md:text-xl">Criar Novo Chatbot</DialogTitle>
               </DialogHeader>
@@ -230,17 +230,17 @@ const Dashboard = () => {
                     className="glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary min-h-[80px]"
                   />
                 </div>
-                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 pt-4">
+                <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-3 pt-4">
                   <Button 
                     variant="outline" 
                     onClick={() => setIsCreateDialogOpen(false)}
-                    className="flex-1 glass-effect border-white/20 text-white hover:bg-white/10"
+                    className="flex-1 glass-effect border-white/20 text-white hover:bg-white/10 order-2 sm:order-1"
                   >
                     Cancelar
                   </Button>
                   <Button 
                     onClick={handleCreateBot}
-                    className="flex-1 gradient-blue hover:opacity-90"
+                    className="flex-1 gradient-blue hover:opacity-90 order-1 sm:order-2"
                   >
                     Criar Chatbot
                   </Button>
@@ -306,27 +306,27 @@ const Dashboard = () => {
                             <Trash2 className="w-3 h-3" />
                           </Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent className="card-dark border-red-500/30 nylo-shadow max-w-md mx-4">
-                          <AlertDialogHeader>
-                            <AlertDialogTitle className="text-white text-base md:text-lg flex items-center gap-3">
-                              <div className="w-8 h-8 md:w-10 md:h-10 bg-red-500/20 rounded-full flex items-center justify-center">
-                                <Trash2 className="w-4 h-4 md:w-5 md:h-5 text-red-400" />
+                        <AlertDialogContent className="card-dark border-red-500/30 nylo-shadow w-[90vw] max-w-md mx-auto">
+                          <AlertDialogHeader className="text-left">
+                            <AlertDialogTitle className="text-white text-lg md:text-xl flex items-center gap-3">
+                              <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                                <Trash2 className="w-5 h-5 text-red-400" />
                               </div>
-                              Excluir Chatbot
+                              <span className="min-w-0">Excluir Chatbot</span>
                             </AlertDialogTitle>
-                            <AlertDialogDescription className="text-gray-300 leading-relaxed text-sm md:text-base">
+                            <AlertDialogDescription className="text-gray-300 leading-relaxed text-sm md:text-base pt-2">
                               Tem certeza que deseja excluir o chatbot <span className="font-semibold text-white">"{bot.name}"</span>?
                               <br /><br />
                               <span className="text-red-400 font-medium">Esta ação não pode ser desfeita.</span>
                             </AlertDialogDescription>
                           </AlertDialogHeader>
-                          <AlertDialogFooter className="gap-3 flex-col sm:flex-row">
-                            <AlertDialogCancel className="glass-effect border-white/20 text-white hover:bg-white/10 w-full sm:w-auto">
+                          <AlertDialogFooter className="flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 pt-4">
+                            <AlertDialogCancel className="glass-effect border-white/20 text-white hover:bg-white/10 w-full sm:w-auto order-2 sm:order-1">
                               Cancelar
                             </AlertDialogCancel>
                             <AlertDialogAction 
                               onClick={() => handleDeleteBot(bot.id, bot.name)}
-                              className="bg-red-500 hover:bg-red-600 text-white border-0 w-full sm:w-auto"
+                              className="bg-red-500 hover:bg-red-600 text-white border-0 w-full sm:w-auto order-1 sm:order-2"
                             >
                               <Trash2 className="w-4 h-4 mr-2" />
                               Sim, excluir
@@ -414,7 +414,7 @@ const Dashboard = () => {
 
         {/* Template Dialog */}
         <Dialog open={isTemplateDialogOpen} onOpenChange={setIsTemplateDialogOpen}>
-          <DialogContent className="card-dark border-primary/30 nylo-shadow text-white mx-4 max-w-md">
+          <DialogContent className="card-dark border-primary/30 nylo-shadow text-white w-[90vw] max-w-md mx-auto">
             <DialogHeader>
               <DialogTitle className="gradient-text text-lg md:text-xl">
                 Criar Chatbot com Template {templates.find(t => t.id === selectedTemplate)?.name}
@@ -443,17 +443,17 @@ const Dashboard = () => {
                   className="glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary min-h-[80px]"
                 />
               </div>
-              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 pt-4">
+              <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-3 pt-4">
                 <Button 
                   variant="outline" 
                   onClick={() => setIsTemplateDialogOpen(false)}
-                  className="flex-1 glass-effect border-white/20 text-white hover:bg-white/10"
+                  className="flex-1 glass-effect border-white/20 text-white hover:bg-white/10 order-2 sm:order-1"
                 >
                   Cancelar
                 </Button>
                 <Button 
                   onClick={handleCreateFromTemplate}
-                  className="flex-1 gradient-blue hover:opacity-90"
+                  className="flex-1 gradient-blue hover:opacity-90 order-1 sm:order-2"
                 >
                   Criar com Template
                 </Button>
