@@ -1,43 +1,34 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSupabaseNylo } from '@/contexts/SupabaseNyloContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bot, Mail, Lock, User, AlertCircle } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Bot, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Auth = () => {
   const navigate = useNavigate();
+  const { loading } = useSupabaseNylo();
   const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
+  const [currentView, setCurrentView] = useState<'login' | 'register'>('login');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
 
-  useEffect(() => {
-    // Check if user is already logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        navigate('/dashboard');
-      }
-    });
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        navigate('/dashboard');
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
-
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !password) {
+  const handleEmailLogin = async () => {
+    if (!formData.email || !formData.password) {
       toast.error('Por favor, preencha todos os campos');
       return;
     }
@@ -45,36 +36,37 @@ const Auth = () => {
     setIsLoading(true);
     try {
       const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: formData.email,
+        password: formData.password,
       });
 
       if (error) {
-        if (error.message.includes('Invalid login credentials')) {
-          toast.error('Email ou senha incorretos');
-        } else if (error.message.includes('Email not confirmed')) {
-          toast.error('Por favor, confirme seu email antes de fazer login');
-        } else {
-          toast.error(error.message);
-        }
+        console.error('Login error:', error);
+        toast.error(error.message || 'Erro ao fazer login');
       } else {
         toast.success('Login realizado com sucesso!');
+        navigate('/dashboard');
       }
     } catch (error) {
-      toast.error('Erro ao fazer login. Tente novamente.');
+      console.error('Login error:', error);
+      toast.error('Erro inesperado ao fazer login');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !password || !fullName) {
+  const handleEmailRegister = async () => {
+    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
       toast.error('Por favor, preencha todos os campos');
       return;
     }
 
-    if (password.length < 6) {
+    if (formData.password !== formData.confirmPassword) {
+      toast.error('As senhas não coincidem');
+      return;
+    }
+
+    if (formData.password.length < 6) {
       toast.error('A senha deve ter pelo menos 6 caracteres');
       return;
     }
@@ -82,179 +74,190 @@ const Auth = () => {
     setIsLoading(true);
     try {
       const { error } = await supabase.auth.signUp({
-        email,
-        password,
+        email: formData.email,
+        password: formData.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
           data: {
-            full_name: fullName,
-          }
+            full_name: formData.name
+          },
+          emailRedirectTo: `${window.location.origin}/dashboard`
         }
       });
 
       if (error) {
-        if (error.message.includes('User already registered')) {
-          toast.error('Este email já está cadastrado. Tente fazer login.');
-        } else {
-          toast.error(error.message);
-        }
+        console.error('Register error:', error);
+        toast.error(error.message || 'Erro ao criar conta');
       } else {
         toast.success('Conta criada com sucesso! Verifique seu email para confirmar.');
+        navigate('/dashboard');
       }
     } catch (error) {
-      toast.error('Erro ao criar conta. Tente novamente.');
+      console.error('Register error:', error);
+      toast.error('Erro inesperado ao criar conta');
     } finally {
       setIsLoading(false);
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-nylo-dark via-nylo-darker to-nylo-card flex items-center justify-center">
+        <div className="text-white">Carregando...</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-nylo-dark via-nylo-darker to-nylo-card flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-nylo-dark via-nylo-darker to-nylo-card overflow-hidden">
       {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-48 h-48 md:w-96 md:h-96 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-full blur-3xl floating-animation"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-32 h-32 md:w-80 md:h-80 bg-gradient-to-r from-blue-500/20 to-primary/20 rounded-full blur-3xl floating-animation" style={{animationDelay: '-3s'}}></div>
+        <div className="absolute top-1/4 left-1/4 w-48 h-48 md:w-96 md:h-96 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-full blur-3xl animate-wave"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-40 h-40 md:w-80 md:h-80 bg-gradient-to-r from-blue-500/20 to-primary/20 rounded-full blur-3xl animate-wave" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/2 w-32 h-32 md:w-64 md:h-64 bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full blur-2xl animate-wave" style={{ animationDelay: '2s' }}></div>
       </div>
 
-      <Card className="w-full max-w-md card-dark border-white/20 nylo-shadow relative z-10">
-        <CardHeader className="text-center pb-4">
-          <div className="flex justify-center mb-4">
-            <div className="w-12 h-12 gradient-blue rounded-xl flex items-center justify-center">
-              <Bot className="w-6 h-6 text-white" />
+      {/* Floating particles */}
+      <div className="absolute inset-0">
+        {[...Array(10)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-primary/30 rounded-full animate-pulse hidden md:block"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 3}s`,
+              animationDuration: `${2 + Math.random() * 2}s`
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="container mx-auto px-4 py-4 md:py-8 min-h-screen flex items-center justify-center relative z-10">
+        <div className="w-full max-w-md space-y-6 md:space-y-8 animate-fade-in">
+          {/* Logo e Header */}
+          <div className="text-center space-y-4 md:space-y-6">
+            <div className="relative">
+              <div className="w-16 h-16 md:w-24 md:h-24 mx-auto gradient-blue rounded-3xl flex items-center justify-center nylo-glow animate-glow-pulse">
+                <Bot className="w-8 h-8 md:w-12 md:h-12 text-white" />
+              </div>
+            </div>
+            <div className="space-y-2 md:space-y-3">
+              <h1 className="text-3xl md:text-5xl font-bold gradient-text animate-gradient-wave bg-gradient-to-r from-primary via-purple-500 to-primary bg-300% animate-gradient-wave">Nylo</h1>
+              <p className="text-base md:text-lg text-gray-300 px-4">Crie chatbots intuitivos sem complicação</p>
             </div>
           </div>
-          <CardTitle className="text-2xl gradient-text">Nylo</CardTitle>
-          <p className="text-gray-400 text-sm">Acesse sua conta ou crie uma nova</p>
-        </CardHeader>
 
-        <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6 bg-black/20">
-              <TabsTrigger 
-                value="signin" 
-                className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary text-gray-400"
-              >
-                Entrar
-              </TabsTrigger>
-              <TabsTrigger 
-                value="signup"
-                className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary text-gray-400"
-              >
-                Registrar
-              </TabsTrigger>
-            </TabsList>
+          {/* Card de Login/Cadastro */}
+          <Card className="card-dark border-0 nylo-shadow hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.02] mx-2 md:mx-0">
+            <CardContent className="p-6 md:p-8 space-y-4 md:space-y-6">
+              {/* Header do formulário */}
+              <div className="flex items-center justify-center">
+                <h2 className="text-lg md:text-xl font-semibold text-white">
+                  {currentView === 'login' ? 'Entrar' : 'Criar Conta'}
+                </h2>
+              </div>
 
-            <TabsContent value="signin">
-              <form onSubmit={handleSignIn} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signin-email" className="text-gray-300">Email</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input
-                      id="signin-email"
-                      type="email"
-                      placeholder="seu@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10 glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="signin-password" className="text-gray-300">Senha</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input
-                      id="signin-password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <Button
-                  type="submit"
-                  className="w-full gradient-blue hover:opacity-90 nylo-shadow"
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Entrando...' : 'Entrar'}
-                </Button>
-              </form>
-            </TabsContent>
-
-            <TabsContent value="signup">
-              <form onSubmit={handleSignUp} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signup-name" className="text-gray-300">Nome Completo</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input
-                      id="signup-name"
-                      type="text"
+              <div className="space-y-3 md:space-y-4">
+                <div className="space-y-3">
+                  {currentView === 'register' && (
+                    <Input 
+                      type="text" 
                       placeholder="Seu nome completo"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      className="pl-10 glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary"
-                      required
+                      value={formData.name}
+                      onChange={(e) => handleInputChange('name', e.target.value)}
+                      className="h-10 md:h-12 glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary focus:ring-primary/20 transition-all duration-300 hover:border-white/30 text-sm md:text-base"
                     />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email" className="text-gray-300">Email</Label>
+                  )}
+                  <Input 
+                    type="email" 
+                    placeholder="seu@email.com"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    className="h-10 md:h-12 glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary focus:ring-primary/20 transition-all duration-300 hover:border-white/30 text-sm md:text-base"
+                  />
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      placeholder="seu@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10 glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary"
-                      required
+                    <Input 
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Sua senha"
+                      value={formData.password}
+                      onChange={(e) => handleInputChange('password', e.target.value)}
+                      className="h-10 md:h-12 glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary focus:ring-primary/20 transition-all duration-300 hover:border-white/30 pr-10 text-sm md:text-base"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
                   </div>
+                  {currentView === 'register' && (
+                    <div className="relative">
+                      <Input 
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="Confirme sua senha"
+                        value={formData.confirmPassword}
+                        onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                        className="h-10 md:h-12 glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary focus:ring-primary/20 transition-all duration-300 hover:border-white/30 pr-10 text-sm md:text-base"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                      >
+                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  )}
+                  <Button 
+                    onClick={currentView === 'login' ? handleEmailLogin : handleEmailRegister}
+                    disabled={isLoading}
+                    className="w-full h-10 md:h-12 gradient-blue hover:opacity-90 transition-all duration-300 nylo-shadow text-white font-medium hover:scale-[1.02] text-sm md:text-base"
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 md:w-4 md:h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        {currentView === 'login' ? 'Entrando...' : 'Criando conta...'}
+                      </div>
+                    ) : (
+                      <span>
+                        <span className="hidden sm:inline">{currentView === 'login' ? 'Entrar com Email' : 'Criar Conta'}</span>
+                        <span className="sm:hidden">{currentView === 'login' ? 'Entrar' : 'Cadastrar'}</span>
+                      </span>
+                    )}
+                  </Button>
                 </div>
+              </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password" className="text-gray-300">Senha</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input
-                      id="signup-password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary"
-                      required
-                      minLength={6}
-                    />
-                  </div>
-                  <p className="text-xs text-gray-400 flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" />
-                    Mínimo de 6 caracteres
-                  </p>
-                </div>
-
-                <Button
-                  type="submit"
-                  className="w-full gradient-blue hover:opacity-90 nylo-shadow"
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Criando conta...' : 'Criar conta'}
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+              <div className="text-center">
+                <p className="text-xs md:text-sm text-gray-400">
+                  {currentView === 'login' ? (
+                    <>
+                      Não tem conta?{' '}
+                      <span 
+                        className="text-primary cursor-pointer hover:underline font-medium transition-colors"
+                        onClick={() => setCurrentView('register')}
+                      >
+                        Criar gratuitamente
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      Já tem conta?{' '}
+                      <span 
+                        className="text-primary cursor-pointer hover:underline font-medium transition-colors"
+                        onClick={() => setCurrentView('login')}
+                      >
+                        Fazer login
+                      </span>
+                    </>
+                  )}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 };

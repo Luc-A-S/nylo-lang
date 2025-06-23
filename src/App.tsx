@@ -4,8 +4,10 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { NyloProvider } from "./contexts/NyloContext";
+import { SupabaseNyloProvider } from "./contexts/SupabaseNyloContext";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import Index from "./pages/Index";
+import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Editor from "./pages/Editor";
 import Preview from "./pages/Preview";
@@ -19,22 +21,43 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <NyloProvider>
+      <SupabaseNyloProvider>
         <Toaster />
         <Sonner />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/editor/:id?" element={<Editor />} />
-            <Route path="/preview/:id" element={<Preview />} />
-            <Route path="/settings/:id" element={<Settings />} />
-            <Route path="/share/:id" element={<Share />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/editor/:id?" element={
+              <ProtectedRoute>
+                <Editor />
+              </ProtectedRoute>
+            } />
+            <Route path="/preview/:id" element={
+              <ProtectedRoute>
+                <Preview />
+              </ProtectedRoute>
+            } />
+            <Route path="/settings/:id" element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            } />
+            <Route path="/share/:id" element={
+              <ProtectedRoute>
+                <Share />
+              </ProtectedRoute>
+            } />
             <Route path="/learn" element={<Learn />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
-      </NyloProvider>
+      </SupabaseNyloProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
