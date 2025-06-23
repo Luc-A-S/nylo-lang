@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,10 +29,6 @@ interface SupabaseNyloContextType {
   session: Session | null;
   chatbots: Chatbot[];
   loading: boolean;
-  signInWithGoogle: () => Promise<void>;
-  signInWithEmail: (email: string, password: string) => Promise<{ error: any }>;
-  signUpWithEmail: (email: string, password: string, fullName?: string) => Promise<{ error: any }>;
-  signOut: () => Promise<void>;
   createChatbot: (name: string, description?: string) => Promise<Chatbot>;
   createChatbotFromTemplate: (template: Template, name: string, description?: string) => Promise<Chatbot>;
   getChatbot: (id: string) => Chatbot | null;
@@ -79,85 +76,6 @@ export function SupabaseNyloProvider({ children }: { children: React.ReactNode }
 
     return () => subscription.unsubscribe();
   }, []);
-
-  const signInWithGoogle = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/dashboard`
-        }
-      });
-
-      if (error) {
-        toast.error('Erro ao fazer login com Google: ' + error.message);
-      }
-    } catch (error) {
-      console.error('Error signing in with Google:', error);
-      toast.error('Erro inesperado ao fazer login com Google');
-    }
-  };
-
-  const signInWithEmail = async (email: string, password: string) => {
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        toast.error('Erro ao fazer login: ' + error.message);
-        return { error };
-      }
-
-      toast.success('Login realizado com sucesso!');
-      return { error: null };
-    } catch (error) {
-      console.error('Error signing in:', error);
-      toast.error('Erro inesperado ao fazer login');
-      return { error };
-    }
-  };
-
-  const signUpWithEmail = async (email: string, password: string, fullName?: string) => {
-    try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
-          data: fullName ? { full_name: fullName } : undefined
-        }
-      });
-
-      if (error) {
-        toast.error('Erro ao criar conta: ' + error.message);
-        return { error };
-      }
-
-      toast.success('Conta criada com sucesso! Verifique seu email para confirmar.');
-      return { error: null };
-    } catch (error) {
-      console.error('Error signing up:', error);
-      toast.error('Erro inesperado ao criar conta');
-      return { error };
-    }
-  };
-
-  const signOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        toast.error('Erro ao fazer logout: ' + error.message);
-      } else {
-        toast.success('Logout realizado com sucesso!');
-      }
-    } catch (error) {
-      console.error('Error signing out:', error);
-      toast.error('Erro inesperado ao fazer logout');
-    }
-  };
 
   const refreshChatbots = async () => {
     if (!user) return;
@@ -340,10 +258,6 @@ fim`;
       session,
       chatbots,
       loading,
-      signInWithGoogle,
-      signInWithEmail,
-      signUpWithEmail,
-      signOut,
       createChatbot,
       createChatbotFromTemplate,
       getChatbot,
