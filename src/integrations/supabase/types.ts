@@ -9,13 +9,119 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      chatbots: {
+        Row: {
+          access_count: number
+          created_at: string
+          description: string | null
+          id: string
+          is_online: boolean
+          name: string
+          nylo_code: string
+          public_link: string | null
+          settings: Json
+          today_access_count: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_count?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_online?: boolean
+          name: string
+          nylo_code?: string
+          public_link?: string | null
+          settings?: Json
+          today_access_count?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_count?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_online?: boolean
+          name?: string
+          nylo_code?: string
+          public_link?: string | null
+          settings?: Json
+          today_access_count?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      conversations: {
+        Row: {
+          chatbot_id: string
+          created_at: string
+          id: string
+          messages: Json
+          session_id: string
+          updated_at: string
+        }
+        Insert: {
+          chatbot_id: string
+          created_at?: string
+          id?: string
+          messages?: Json
+          session_id: string
+          updated_at?: string
+        }
+        Update: {
+          chatbot_id?: string
+          created_at?: string
+          id?: string
+          messages?: Json
+          session_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_chatbot_id_fkey"
+            columns: ["chatbot_id"]
+            isOneToOne: false
+            referencedRelation: "chatbots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_public_link: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
