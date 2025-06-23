@@ -5,33 +5,85 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Bot, Zap, Globe, ArrowLeft, Users, Shield, Rocket, Eye, EyeOff } from 'lucide-react';
+import { useSupabaseNylo } from '@/contexts/SupabaseNyloContext';
+import { toast } from 'sonner';
 
 const Index = () => {
   const navigate = useNavigate();
+  const { signInWithGoogle, signInWithEmail, signUpWithEmail } = useSupabaseNylo();
   const [isLoading, setIsLoading] = useState(false);
   const [currentView, setCurrentView] = useState<'login' | 'register'>('login');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    fullName: ''
+  });
 
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = async () => {
     setIsLoading(true);
-    setTimeout(() => {
-      navigate('/dashboard');
-    }, 1500);
+    try {
+      await signInWithGoogle();
+    } catch (error) {
+      console.error('Google login error:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleEmailLogin = () => {
+  const handleEmailLogin = async () => {
+    if (!formData.email || !formData.password) {
+      toast.error('Por favor, preencha todos os campos');
+      return;
+    }
+
     setIsLoading(true);
-    setTimeout(() => {
-      navigate('/dashboard');
-    }, 1500);
+    try {
+      const { error } = await signInWithEmail(formData.email, formData.password);
+      if (!error) {
+        navigate('/dashboard');
+      }
+    } catch (error) {
+      console.error('Email login error:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleEmailRegister = () => {
+  const handleEmailRegister = async () => {
+    if (!formData.email || !formData.password || !formData.confirmPassword) {
+      toast.error('Por favor, preencha todos os campos');
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      toast.error('As senhas não coincidem');
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      toast.error('A senha deve ter pelo menos 6 caracteres');
+      return;
+    }
+
     setIsLoading(true);
-    setTimeout(() => {
-      navigate('/dashboard');
-    }, 1500);
+    try {
+      const { error } = await signUpWithEmail(formData.email, formData.password, formData.fullName);
+      if (!error) {
+        setCurrentView('login');
+        setFormData({ email: '', password: '', confirmPassword: '', fullName: '' });
+      }
+    } catch (error) {
+      console.error('Email register error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleInputChange = (field: keyof typeof formData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -129,18 +181,24 @@ const Index = () => {
                     <Input 
                       type="text" 
                       placeholder="Seu nome completo"
+                      value={formData.fullName}
+                      onChange={(e) => handleInputChange('fullName', e.target.value)}
                       className="h-10 md:h-12 glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary focus:ring-primary/20 transition-all duration-300 hover:border-white/30 text-sm md:text-base"
                     />
                   )}
                   <Input 
                     type="email" 
                     placeholder="seu@email.com"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
                     className="h-10 md:h-12 glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary focus:ring-primary/20 transition-all duration-300 hover:border-white/30 text-sm md:text-base"
                   />
                   <div className="relative">
                     <Input 
                       type={showPassword ? "text" : "password"}
                       placeholder="Sua senha"
+                      value={formData.password}
+                      onChange={(e) => handleInputChange('password', e.target.value)}
                       className="h-10 md:h-12 glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary focus:ring-primary/20 transition-all duration-300 hover:border-white/30 pr-10 text-sm md:text-base"
                     />
                     <button
@@ -156,6 +214,8 @@ const Index = () => {
                       <Input 
                         type={showConfirmPassword ? "text" : "password"}
                         placeholder="Confirme sua senha"
+                        value={formData.confirmPassword}
+                        onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
                         className="h-10 md:h-12 glass-effect border-white/20 text-white placeholder-gray-400 focus:border-primary focus:ring-primary/20 transition-all duration-300 hover:border-white/30 pr-10 text-sm md:text-base"
                       />
                       <button
