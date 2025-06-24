@@ -1,7 +1,6 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useNylo } from '@/contexts/NyloContext';
+import { useSupabaseNylo } from '@/contexts/SupabaseNyloContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -26,7 +25,7 @@ interface ParsedFlow {
 const Preview = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getChatbot, generatePublicLink } = useNylo();
+  const { getChatbot, generatePublicLink } = useSupabaseNylo();
   const [chatbot] = useState(getChatbot(id || ''));
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [currentFlow, setCurrentFlow] = useState('inicio');
@@ -36,16 +35,17 @@ const Preview = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  console.log('Preview: Component initialized', { id, chatbot: !!chatbot });
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  useEffect(() => {
+    console.log('Preview: useEffect triggered', { id, chatbot: !!chatbot });
+    
     if (!chatbot) {
+      console.log('Preview: Chatbot not found, redirecting to dashboard');
       navigate('/dashboard');
       return;
     }
@@ -189,7 +189,11 @@ const Preview = () => {
   };
 
   if (!chatbot) {
-    return <div>Carregando...</div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-nylo-dark via-nylo-darker to-nylo-card flex items-center justify-center">
+        <div className="text-white">Carregando...</div>
+      </div>
+    );
   }
 
   return (
@@ -268,14 +272,14 @@ const Preview = () => {
           {/* Chat Header */}
           <div 
             className="p-3 md:p-4 text-white transition-colors duration-300"
-            style={{ background: `linear-gradient(135deg, ${chatbot.settings.brandingColor}, ${chatbot.settings.brandingColor}dd)` }}
+            style={{ background: `linear-gradient(135deg, ${chatbot.settings?.brandingColor || '#356CFF'}, ${chatbot.settings?.brandingColor || '#356CFF'}dd)` }}
           >
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 md:w-10 md:h-10 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
                 <Bot className="w-4 h-4 md:w-6 md:h-6" />
               </div>
               <div className="min-w-0 flex-1">
-                <h3 className="font-semibold text-sm md:text-base truncate">{chatbot.settings.businessName}</h3>
+                <h3 className="font-semibold text-sm md:text-base truncate">{chatbot.settings?.businessName || chatbot.name}</h3>
                 <div className="flex items-center space-x-2 text-xs md:text-sm text-white/80">
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                   <span className="truncate">Online • Respondendo em segundos</span>
@@ -289,7 +293,7 @@ const Preview = () => {
             className={`flex-1 p-3 md:p-4 space-y-3 md:space-y-4 overflow-y-auto scroll-smooth ${isFullscreen ? 'h-[calc(100vh-240px)] md:h-[calc(100vh-300px)]' : 'h-[380px] md:h-[480px]'}`}
             style={{ 
               scrollbarWidth: 'thin',
-              scrollbarColor: `${chatbot.settings.brandingColor}30 transparent`
+              scrollbarColor: `${chatbot.settings?.brandingColor || '#356CFF'}30 transparent`
             }}
           >
             {messages.map((message, index) => (
@@ -305,7 +309,7 @@ const Preview = () => {
                       : 'text-white shadow-lg'
                   }`}
                   style={!message.isBot ? {
-                    background: `linear-gradient(135deg, ${chatbot.settings.brandingColor}, ${chatbot.settings.brandingColor}dd)`
+                    background: `linear-gradient(135deg, ${chatbot.settings?.brandingColor || '#356CFF'}, ${chatbot.settings?.brandingColor || '#356CFF'}dd)`
                   } : {}}
                 >
                   <p className="text-xs md:text-sm whitespace-pre-line leading-relaxed">{message.text}</p>
@@ -352,7 +356,7 @@ const Preview = () => {
                   disabled={!userInput.trim()}
                   className="transition-all duration-300 hover:scale-105 text-sm md:text-base px-3 md:px-4"
                   style={{ 
-                    background: `linear-gradient(135deg, ${chatbot.settings.brandingColor}, ${chatbot.settings.brandingColor}dd)` 
+                    background: `linear-gradient(135deg, ${chatbot.settings?.brandingColor || '#356CFF'}, ${chatbot.settings?.brandingColor || '#356CFF'}dd)` 
                   }}
                 >
                   Enviar

@@ -1,19 +1,17 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useNylo } from '@/contexts/NyloContext';
+import { useSupabaseNylo } from '@/contexts/SupabaseNyloContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { 
-  ArrowLeft, 
   Save, 
   Palette, 
   MessageSquare, 
@@ -30,7 +28,7 @@ import { toast } from 'sonner';
 const Settings = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getChatbot, updateChatbot, deleteChatbot } = useNylo();
+  const { getChatbot, updateChatbot, deleteChatbot } = useSupabaseNylo();
   const [chatbot, setChatbot] = useState(getChatbot(id || ''));
   const [settings, setSettings] = useState(chatbot?.settings || {
     brandingColor: '#356CFF',
@@ -38,19 +36,36 @@ const Settings = () => {
     welcomeMessage: ''
   });
 
+  console.log('Settings: Component initialized', { id, chatbot: !!chatbot });
+
   useEffect(() => {
+    console.log('Settings: useEffect triggered', { id, chatbot: !!chatbot });
+    
     if (!chatbot) {
+      console.log('Settings: Chatbot not found, redirecting to dashboard');
       navigate('/dashboard');
       return;
     }
-    setSettings(chatbot.settings);
+    setSettings(chatbot.settings || {
+      brandingColor: '#356CFF',
+      businessName: chatbot.name,
+      welcomeMessage: 'Olá! Como posso ajudar você hoje?'
+    });
   }, [chatbot, navigate]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!chatbot) return;
     
-    updateChatbot(chatbot.id, { settings });
-    toast.success('Configurações salvas com sucesso!');
+    console.log('Settings: Saving chatbot settings', { id: chatbot.id, settings });
+    
+    try {
+      await updateChatbot(chatbot.id, { settings });
+      setChatbot(prev => prev ? { ...prev, settings } : null);
+      toast.success('Configurações salvas com sucesso!');
+    } catch (error) {
+      console.error('Settings: Error saving settings:', error);
+      toast.error('Erro ao salvar configurações');
+    }
   };
 
   const handleExport = () => {
@@ -69,12 +84,17 @@ const Settings = () => {
     toast.success('Configuração exportada!');
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!chatbot) return;
     
-    deleteChatbot(chatbot.id);
-    toast.success('Chatbot excluído com sucesso!');
-    navigate('/dashboard');
+    try {
+      await deleteChatbot(chatbot.id);
+      toast.success('Chatbot excluído com sucesso!');
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Settings: Error deleting chatbot:', error);
+      toast.error('Erro ao excluir chatbot');
+    }
   };
 
   const handleCopyLink = () => {
@@ -85,7 +105,11 @@ const Settings = () => {
   };
 
   if (!chatbot) {
-    return <div>Carregando...</div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-nylo-dark via-nylo-darker to-nylo-card flex items-center justify-center">
+        <div className="text-white">Carregando...</div>
+      </div>
+    );
   }
 
   return (
