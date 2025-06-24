@@ -107,6 +107,7 @@ export function SupabaseNyloProvider({ children }: { children: React.ReactNode }
 
       if (error) {
         console.error('SupabaseNyloContext: Error fetching chatbots:', error);
+        toast.error('Erro ao carregar chatbots: ' + error.message);
         return;
       }
 
@@ -129,11 +130,15 @@ export function SupabaseNyloProvider({ children }: { children: React.ReactNode }
       console.log('SupabaseNyloContext: Chatbots set in state:', transformedChatbots.length);
     } catch (error) {
       console.error('SupabaseNyloContext: Error refreshing chatbots:', error);
+      toast.error('Erro inesperado ao carregar chatbots');
     }
   };
 
   const createChatbot = async (name: string, description?: string): Promise<Chatbot> => {
-    if (!user) throw new Error('User not authenticated');
+    if (!user) {
+      console.error('SupabaseNyloContext: User not authenticated for createChatbot');
+      throw new Error('User not authenticated');
+    }
 
     console.log('SupabaseNyloContext: Creating chatbot', { name, description, userId: user.id });
 
@@ -155,79 +160,94 @@ fluxo suporte:
 
 fim`;
 
-    const { data, error } = await supabase
-      .from('chatbots')
-      .insert({
-        user_id: user.id,
-        name,
-        description,
-        nylo_code: defaultSourceCode,
-      })
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('chatbots')
+        .insert({
+          user_id: user.id,
+          name,
+          description,
+          nylo_code: defaultSourceCode,
+        })
+        .select()
+        .single();
 
-    if (error) {
-      console.error('SupabaseNyloContext: Error creating chatbot:', error);
+      if (error) {
+        console.error('SupabaseNyloContext: Error creating chatbot:', error);
+        toast.error('Erro ao criar chatbot: ' + error.message);
+        throw error;
+      }
+
+      console.log('SupabaseNyloContext: Chatbot created successfully', data);
+
+      const newChatbot: Chatbot = {
+        id: data.id,
+        name: data.name,
+        description: data.description,
+        sourceCode: data.nylo_code,
+        isOnline: data.is_online,
+        publicLink: data.public_link,
+        accessCount: data.access_count,
+        todayAccessCount: data.today_access_count,
+        lastUpdated: new Date(data.updated_at),
+        createdAt: new Date(data.created_at),
+      };
+
+      setChatbots(prev => [newChatbot, ...prev]);
+      return newChatbot;
+    } catch (error) {
+      console.error('SupabaseNyloContext: Create chatbot failed:', error);
       throw error;
     }
-
-    console.log('SupabaseNyloContext: Chatbot created successfully', data);
-
-    const newChatbot: Chatbot = {
-      id: data.id,
-      name: data.name,
-      description: data.description,
-      sourceCode: data.nylo_code,
-      isOnline: data.is_online,
-      publicLink: data.public_link,
-      accessCount: data.access_count,
-      todayAccessCount: data.today_access_count,
-      lastUpdated: new Date(data.updated_at),
-      createdAt: new Date(data.created_at),
-    };
-
-    setChatbots(prev => [newChatbot, ...prev]);
-    return newChatbot;
   };
 
   const createChatbotFromTemplate = async (template: Template, name: string, description?: string): Promise<Chatbot> => {
-    if (!user) throw new Error('User not authenticated');
+    if (!user) {
+      console.error('SupabaseNyloContext: User not authenticated for createChatbotFromTemplate');
+      throw new Error('User not authenticated');
+    }
 
     console.log('SupabaseNyloContext: Creating chatbot from template', { template: template.id, name, description, userId: user.id });
 
-    const { data, error } = await supabase
-      .from('chatbots')
-      .insert({
-        user_id: user.id,
-        name,
-        description,
-        nylo_code: template.sourceCode,
-      })
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('chatbots')
+        .insert({
+          user_id: user.id,
+          name,
+          description,
+          nylo_code: template.sourceCode,
+        })
+        .select()
+        .single();
 
-    if (error) {
-      console.error('SupabaseNyloContext: Error creating chatbot from template:', error);
+      if (error) {
+        console.error('SupabaseNyloContext: Error creating chatbot from template:', error);
+        toast.error('Erro ao criar chatbot do template: ' + error.message);
+        throw error;
+      }
+
+      console.log('SupabaseNyloContext: Chatbot created from template successfully', data);
+
+      const newChatbot: Chatbot = {
+        id: data.id,
+        name: data.name,
+        description: data.description,
+        sourceCode: data.nylo_code,
+        isOnline: data.is_online,
+        publicLink: data.public_link,
+        accessCount: data.access_count,
+        todayAccessCount: data.today_access_count,
+        lastUpdated: new Date(data.updated_at),
+        createdAt: new Date(data.created_at),
+      };
+
+      setChatbots(prev => [newChatbot, ...prev]);
+      return newChatbot;
+    } catch (error) {
+      console.error('SupabaseNyloContext: Create chatbot from template failed:', error);
       throw error;
     }
-
-    console.log('SupabaseNyloContext: Chatbot created from template successfully', data);
-
-    const newChatbot: Chatbot = {
-      id: data.id,
-      name: data.name,
-      description: data.description,
-      sourceCode: data.nylo_code,
-      isOnline: data.is_online,
-      publicLink: data.public_link,
-      accessCount: data.access_count,
-      todayAccessCount: data.today_access_count,
-      lastUpdated: new Date(data.updated_at),
-      createdAt: new Date(data.created_at),
-    };
-
-    setChatbots(prev => [newChatbot, ...prev]);
-    return newChatbot;
   };
 
   const getChatbot = (id: string): Chatbot | null => {
@@ -235,7 +255,10 @@ fim`;
   };
 
   const updateChatbot = async (id: string, updates: Partial<Chatbot>): Promise<void> => {
-    if (!user) throw new Error('User not authenticated');
+    if (!user) {
+      console.error('SupabaseNyloContext: User not authenticated for updateChatbot');
+      throw new Error('User not authenticated');
+    }
 
     console.log('SupabaseNyloContext: Updating chatbot', { id, updates });
 
@@ -246,48 +269,65 @@ fim`;
     if (updates.sourceCode !== undefined) updateData.nylo_code = updates.sourceCode;
     if (updates.isOnline !== undefined) updateData.is_online = updates.isOnline;
 
-    const { error } = await supabase
-      .from('chatbots')
-      .update(updateData)
-      .eq('id', id);
+    try {
+      const { error } = await supabase
+        .from('chatbots')
+        .update(updateData)
+        .eq('id', id)
+        .eq('user_id', user.id); // Ensure user can only update their own chatbots
 
-    if (error) {
-      console.error('SupabaseNyloContext: Error updating chatbot:', error);
+      if (error) {
+        console.error('SupabaseNyloContext: Error updating chatbot:', error);
+        toast.error('Erro ao atualizar chatbot: ' + error.message);
+        throw error;
+      }
+
+      console.log('SupabaseNyloContext: Chatbot updated successfully');
+
+      setChatbots(prev => prev.map(bot => {
+        if (bot.id === id) {
+          return {
+            ...bot,
+            ...updates,
+            lastUpdated: new Date(),
+          };
+        }
+        return bot;
+      }));
+    } catch (error) {
+      console.error('SupabaseNyloContext: Update chatbot failed:', error);
       throw error;
     }
-
-    console.log('SupabaseNyloContext: Chatbot updated successfully');
-
-    setChatbots(prev => prev.map(bot => {
-      if (bot.id === id) {
-        return {
-          ...bot,
-          ...updates,
-          lastUpdated: new Date(),
-        };
-      }
-      return bot;
-    }));
   };
 
   const deleteChatbot = async (id: string): Promise<void> => {
-    if (!user) throw new Error('User not authenticated');
+    if (!user) {
+      console.error('SupabaseNyloContext: User not authenticated for deleteChatbot');
+      throw new Error('User not authenticated');
+    }
 
     console.log('SupabaseNyloContext: Deleting chatbot', { id, userId: user.id });
 
-    const { error } = await supabase
-      .from('chatbots')
-      .delete()
-      .eq('id', id);
+    try {
+      const { error } = await supabase
+        .from('chatbots')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id); // Ensure user can only delete their own chatbots
 
-    if (error) {
-      console.error('SupabaseNyloContext: Error deleting chatbot:', error);
+      if (error) {
+        console.error('SupabaseNyloContext: Error deleting chatbot:', error);
+        toast.error('Erro ao excluir chatbot: ' + error.message);
+        throw error;
+      }
+
+      console.log('SupabaseNyloContext: Chatbot deleted successfully');
+
+      setChatbots(prev => prev.filter(bot => bot.id !== id));
+    } catch (error) {
+      console.error('SupabaseNyloContext: Delete chatbot failed:', error);
       throw error;
     }
-
-    console.log('SupabaseNyloContext: Chatbot deleted successfully');
-
-    setChatbots(prev => prev.filter(bot => bot.id !== id));
   };
 
   const contextValue = {
