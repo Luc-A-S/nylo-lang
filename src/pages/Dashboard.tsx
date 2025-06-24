@@ -1,7 +1,7 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useNylo } from '@/contexts/NyloContext';
+import { useSupabaseNylo } from '@/contexts/SupabaseNyloContext';
+import { supabase } from '@/integrations/supabase/client';
 import { templates as templateData } from '@/data/templates';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { chatbots, createChatbot, deleteChatbot, createChatbotFromTemplate } = useNylo();
+  const { chatbots, createChatbot, deleteChatbot, createChatbotFromTemplate, user } = useSupabaseNylo();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
@@ -49,18 +49,23 @@ const Dashboard = () => {
     }
   ];
 
-  const handleCreateBot = () => {
+  const handleCreateBot = async () => {
     if (!newBotName.trim()) {
       toast.error('Nome do chatbot é obrigatório');
       return;
     }
 
-    const newBot = createChatbot(newBotName, newBotDescription);
-    setIsCreateDialogOpen(false);
-    setNewBotName('');
-    setNewBotDescription('');
-    toast.success('Chatbot criado com sucesso!');
-    navigate(`/editor/${newBot.id}`);
+    try {
+      const newBot = await createChatbot(newBotName, newBotDescription);
+      setIsCreateDialogOpen(false);
+      setNewBotName('');
+      setNewBotDescription('');
+      toast.success('Chatbot criado com sucesso!');
+      navigate(`/editor/${newBot.id}`);
+    } catch (error) {
+      console.error('Error creating chatbot:', error);
+      toast.error('Erro ao criar chatbot');
+    }
   };
 
   const handleTemplateSelect = (templateId: string) => {
@@ -73,36 +78,56 @@ const Dashboard = () => {
     }
   };
 
-  const handleCreateFromTemplate = () => {
+  const handleCreateFromTemplate = async () => {
     if (!newBotName.trim()) {
       toast.error('Nome do chatbot é obrigatório');
       return;
     }
 
-    // Find the template object from templateData
     const templateObject = templateData.find(t => t.id === selectedTemplate);
     if (!templateObject) {
       toast.error('Template não encontrado');
       return;
     }
 
-    const newBot = createChatbotFromTemplate(templateObject, newBotName, newBotDescription);
-    setIsTemplateDialogOpen(false);
-    setNewBotName('');
-    setNewBotDescription('');
-    setSelectedTemplate('');
-    toast.success('Chatbot criado com sucesso!');
-    navigate(`/editor/${newBot.id}`);
+    try {
+      const newBot = await createChatbotFromTemplate(templateObject, newBotName, newBotDescription);
+      setIsTemplateDialogOpen(false);
+      setNewBotName('');
+      setNewBotDescription('');
+      setSelectedTemplate('');
+      toast.success('Chatbot criado com sucesso!');
+      navigate(`/editor/${newBot.id}`);
+    } catch (error) {
+      console.error('Error creating chatbot from template:', error);
+      toast.error('Erro ao criar chatbot');
+    }
   };
 
-  const handleDeleteBot = (id: string, name: string) => {
-    deleteChatbot(id);
-    toast.success('Chatbot excluído com sucesso!');
+  const handleDeleteBot = async (id: string, name: string) => {
+    try {
+      await deleteChatbot(id);
+      toast.success('Chatbot excluído com sucesso!');
+    } catch (error) {
+      console.error('Error deleting chatbot:', error);
+      toast.error('Erro ao excluir chatbot');
+    }
   };
 
-  const handleLogout = () => {
-    navigate('/');
-    toast.success('Logout realizado com sucesso!');
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Logout error:', error);
+        toast.error('Erro ao fazer logout');
+      } else {
+        navigate('/');
+        toast.success('Logout realizado com sucesso!');
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Erro ao fazer logout');
+    }
   };
 
   const formatDate = (date: Date) => {
@@ -114,6 +139,15 @@ const Dashboard = () => {
       minute: '2-digit'
     }).format(date);
   };
+
+  // Show loading if user is not loaded yet
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-nylo-dark via-nylo-darker to-nylo-card flex items-center justify-center">
+        <div className="text-white">Carregando...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-nylo-dark via-nylo-darker to-nylo-card">
@@ -250,7 +284,6 @@ const Dashboard = () => {
           </Dialog>
         </div>
 
-        {/* Chatbots Grid */}
         {chatbots.length === 0 ? (
           <Card className="card-dark border-dashed border-2 border-white/20">
             <CardContent className="flex flex-col items-center justify-center py-12 md:py-16 text-center px-4">
