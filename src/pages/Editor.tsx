@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useNylo } from '@/contexts/NyloContext';
+import { useSupabaseNylo } from '@/contexts/SupabaseNyloContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -14,37 +14,71 @@ import CodeEditor from '@/components/CodeEditor';
 const Editor = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getChatbot, updateChatbot } = useNylo();
+  const { getChatbot, updateChatbot } = useSupabaseNylo();
   const [chatbot, setChatbot] = useState(getChatbot(id || ''));
   const [sourceCode, setSourceCode] = useState(chatbot?.sourceCode || '');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  console.log('Editor: Component initialized', { id, chatbot: !!chatbot });
+
   useEffect(() => {
-    if (!chatbot) {
+    console.log('Editor: useEffect triggered', { id, chatbot: !!chatbot });
+    
+    if (!id) {
+      console.log('Editor: No ID provided, redirecting to dashboard');
       navigate('/dashboard');
       return;
     }
-    setSourceCode(chatbot.sourceCode);
-  }, [chatbot, navigate]);
 
-  const handleSave = () => {
+    const foundChatbot = getChatbot(id);
+    console.log('Editor: Found chatbot', { id, foundChatbot: !!foundChatbot });
+    
+    if (!foundChatbot) {
+      console.log('Editor: Chatbot not found, redirecting to dashboard');
+      navigate('/dashboard');
+      return;
+    }
+    
+    setChatbot(foundChatbot);
+    setSourceCode(foundChatbot.sourceCode);
+  }, [id, getChatbot, navigate]);
+
+  const handleSave = async () => {
     if (!chatbot) return;
     
-    updateChatbot(chatbot.id, { sourceCode });
-    toast.success('Chatbot salvo com sucesso!');
+    console.log('Editor: Saving chatbot', { id: chatbot.id, sourceCodeLength: sourceCode.length });
+    
+    try {
+      await updateChatbot(chatbot.id, { sourceCode });
+      toast.success('Chatbot salvo com sucesso!');
+    } catch (error) {
+      console.error('Editor: Error saving chatbot:', error);
+      toast.error('Erro ao salvar chatbot');
+    }
   };
 
-  const handleToggleOnline = () => {
+  const handleToggleOnline = async () => {
     if (!chatbot) return;
     
     const newStatus = !chatbot.isOnline;
-    updateChatbot(chatbot.id, { isOnline: newStatus });
-    setChatbot(prev => prev ? { ...prev, isOnline: newStatus } : null);
-    toast.success(`Chatbot ${newStatus ? 'ativado' : 'desativado'}!`);
+    console.log('Editor: Toggling online status', { id: chatbot.id, newStatus });
+    
+    try {
+      await updateChatbot(chatbot.id, { isOnline: newStatus });
+      setChatbot(prev => prev ? { ...prev, isOnline: newStatus } : null);
+      toast.success(`Chatbot ${newStatus ? 'ativado' : 'desativado'}!`);
+    } catch (error) {
+      console.error('Editor: Error toggling online status:', error);
+      toast.error('Erro ao alterar status do chatbot');
+    }
   };
 
   if (!chatbot) {
-    return <div>Carregando...</div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-nylo-dark via-nylo-darker to-nylo-card flex items-center justify-center">
+        <div className="text-white">Carregando...</div>
+      </div>
+    );
   }
 
   return (
