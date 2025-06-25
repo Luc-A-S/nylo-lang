@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useNylo } from '@/contexts/NyloContext';
+import { useSupabaseNylo } from '@/contexts/SupabaseNyloContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 const Share = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getChatbot, generatePublicLink } = useNylo();
+  const { getChatbot, generatePublicLink } = useSupabaseNylo();
   const [chatbot] = useState(getChatbot(id || ''));
   const [publicLink, setPublicLink] = useState('');
   const [qrCodeUrl, setQrCodeUrl] = useState('');
@@ -110,9 +110,7 @@ const Share = () => {
               <div className="flex items-center justify-center mb-2">
                 <Users className="w-6 h-6 md:w-8 md:h-8 text-green-400" />
               </div>
-              <div className="text-lg md:text-2xl font-bold text-green-400 mb-1">
-                {chatbot.accessHistory?.reduce((sum, day) => sum + day.uniqueVisitors, 0) || 0}
-              </div>
+              <div className="text-lg md:text-2xl font-bold text-green-400 mb-1">0</div>
               <div className="text-xs text-gray-400">
                 <span className="hidden sm:inline">Visitantes Únicos</span>
                 <span className="sm:hidden">Únicos</span>
@@ -239,42 +237,6 @@ const Share = () => {
             </CardContent>
           </Card>
         </div>
-
-        {/* Histórico de Acessos */}
-        {chatbot.accessHistory && chatbot.accessHistory.length > 0 && (
-          <Card className="mt-6 md:mt-8 card-dark border-0 nylo-shadow">
-            <CardHeader>
-              <CardTitle className="text-white text-lg md:text-xl">
-                Histórico de Acessos 
-                <span className="hidden sm:inline">(Últimos 7 dias)</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3 md:space-y-4">
-                {chatbot.accessHistory.slice(-7).map((day, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-black/20 rounded-lg">
-                    <div className="flex items-center space-x-2 md:space-x-3">
-                      <Calendar className="w-4 h-4 text-gray-400 hidden sm:block" />
-                      <span className="text-white font-medium text-sm md:text-base">
-                        {new Date(day.date).toLocaleDateString('pt-BR')}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-4 md:space-x-6">
-                      <div className="text-center">
-                        <div className="text-primary font-semibold text-sm md:text-base">{day.count}</div>
-                        <div className="text-xs text-gray-400">Acessos</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-blue-400 font-semibold text-sm md:text-base">{day.uniqueVisitors}</div>
-                        <div className="text-xs text-gray-400">Únicos</div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Dicas de Compartilhamento */}
         <Card className="mt-6 md:mt-8 card-dark border border-primary/20 bg-primary/5">
