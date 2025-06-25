@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -62,6 +63,7 @@ export function SupabaseNyloProvider({ children }: { children: React.ReactNode }
     const currentUser = user || session?.user;
     if (!currentUser) {
       console.log('SupabaseNyloContext: No user found, skipping chatbot refresh');
+      setChatbots([]);
       return;
     }
 
@@ -129,6 +131,23 @@ export function SupabaseNyloProvider({ children }: { children: React.ReactNode }
   useEffect(() => {
     console.log('SupabaseNyloContext: Setting up auth state listener');
     
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('SupabaseNyloContext: Initial session check', { 
+        session: !!session, 
+        user: !!session?.user 
+      });
+      
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        console.log('SupabaseNyloContext: Initial session found, refreshing chatbots');
+        refreshChatbots();
+      }
+      setLoading(false);
+    });
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('SupabaseNyloContext: Auth state changed', { 
@@ -142,32 +161,10 @@ export function SupabaseNyloProvider({ children }: { children: React.ReactNode }
       
       if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
         console.log('SupabaseNyloContext: User signed in, refreshing chatbots');
-        // Use setTimeout to ensure state is updated
-        setTimeout(() => {
-          refreshChatbots();
-        }, 100);
+        refreshChatbots();
       } else if (event === 'SIGNED_OUT') {
         console.log('SupabaseNyloContext: User signed out, clearing chatbots');
         setChatbots([]);
-      }
-      setLoading(false);
-    });
-
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('SupabaseNyloContext: Initial session check', { 
-        session: !!session, 
-        user: !!session?.user 
-      });
-      
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        console.log('SupabaseNyloContext: Initial session found, refreshing chatbots');
-        setTimeout(() => {
-          refreshChatbots();
-        }, 100);
       }
       setLoading(false);
     });
@@ -215,7 +212,8 @@ fim`;
           name,
           description,
           nylo_code: defaultSourceCode,
-          settings: defaultSettings as any, // Cast to any to satisfy Json type
+          settings: defaultSettings,
+          is_online: false,
         })
         .select()
         .single();
@@ -235,14 +233,15 @@ fim`;
         sourceCode: data.nylo_code,
         isOnline: data.is_online,
         publicLink: data.public_link,
-        accessCount: data.access_count,
-        todayAccessCount: data.today_access_count,
+        accessCount: data.access_count || 0,
+        todayAccessCount: data.today_access_count || 0,
         lastUpdated: new Date(data.updated_at),
         createdAt: new Date(data.created_at),
         settings: defaultSettings,
       };
 
       setChatbots(prev => [newChatbot, ...prev]);
+      toast.success('Chatbot criado com sucesso!');
       return newChatbot;
     } catch (error) {
       console.error('SupabaseNyloContext: Create chatbot failed:', error);
@@ -272,7 +271,8 @@ fim`;
           name,
           description,
           nylo_code: template.sourceCode,
-          settings: defaultSettings as any, // Cast to any to satisfy Json type
+          settings: defaultSettings,
+          is_online: false,
         })
         .select()
         .single();
@@ -292,14 +292,15 @@ fim`;
         sourceCode: data.nylo_code,
         isOnline: data.is_online,
         publicLink: data.public_link,
-        accessCount: data.access_count,
-        todayAccessCount: data.today_access_count,
+        accessCount: data.access_count || 0,
+        todayAccessCount: data.today_access_count || 0,
         lastUpdated: new Date(data.updated_at),
         createdAt: new Date(data.created_at),
         settings: defaultSettings,
       };
 
       setChatbots(prev => [newChatbot, ...prev]);
+      toast.success('Chatbot criado com sucesso!');
       return newChatbot;
     } catch (error) {
       console.error('SupabaseNyloContext: Create chatbot from template failed:', error);
@@ -325,14 +326,16 @@ fim`;
     if (updates.description !== undefined) updateData.description = updates.description;
     if (updates.sourceCode !== undefined) updateData.nylo_code = updates.sourceCode;
     if (updates.isOnline !== undefined) updateData.is_online = updates.isOnline;
-    if (updates.settings !== undefined) updateData.settings = updates.settings as any; // Cast to any to satisfy Json type
+    if (updates.settings !== undefined) updateData.settings = updates.settings;
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('chatbots')
         .update(updateData)
         .eq('id', id)
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .select()
+        .single();
 
       if (error) {
         console.error('SupabaseNyloContext: Error updating chatbot:', error);
@@ -340,18 +343,21 @@ fim`;
         throw error;
       }
 
-      console.log('SupabaseNyloContext: Chatbot updated successfully');
+      console.log('SupabaseNyloContext: Chatbot updated successfully', data);
 
       setChatbots(prev => prev.map(bot => {
         if (bot.id === id) {
           return {
             ...bot,
             ...updates,
+            publicLink: data.public_link, // Update with the latest public link from DB
             lastUpdated: new Date(),
           };
         }
         return bot;
       }));
+
+      toast.success('Chatbot atualizado com sucesso!');
     } catch (error) {
       console.error('SupabaseNyloContext: Update chatbot failed:', error);
       throw error;
@@ -371,7 +377,7 @@ fim`;
         .from('chatbots')
         .delete()
         .eq('id', id)
-        .eq('user_id', user.id); // Ensure user can only delete their own chatbots
+        .eq('user_id', user.id);
 
       if (error) {
         console.error('SupabaseNyloContext: Error deleting chatbot:', error);
@@ -382,6 +388,7 @@ fim`;
       console.log('SupabaseNyloContext: Chatbot deleted successfully');
 
       setChatbots(prev => prev.filter(bot => bot.id !== id));
+      toast.success('Chatbot excluído com sucesso!');
     } catch (error) {
       console.error('SupabaseNyloContext: Delete chatbot failed:', error);
       throw error;
@@ -390,14 +397,7 @@ fim`;
 
   const generatePublicLink = (id: string): string => {
     const chatbot = getChatbot(id);
-    if (!chatbot) return '';
-    
-    if (!chatbot.publicLink) {
-      const link = `${chatbot.name.toLowerCase().replace(/\s+/g, '-')}-${id}.nylo.app`;
-      updateChatbot(id, { publicLink: link });
-      return link;
-    }
-    
+    if (!chatbot || !chatbot.publicLink) return '';
     return chatbot.publicLink;
   };
 

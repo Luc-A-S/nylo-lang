@@ -11,25 +11,42 @@ import { toast } from 'sonner';
 const Share = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getChatbot, generatePublicLink } = useSupabaseNylo();
-  const [chatbot] = useState(getChatbot(id || ''));
+  const { getChatbot } = useSupabaseNylo();
+  const [chatbot, setChatbot] = useState(getChatbot(id || ''));
   const [publicLink, setPublicLink] = useState('');
   const [qrCodeUrl, setQrCodeUrl] = useState('');
 
   useEffect(() => {
-    if (!chatbot) {
+    if (!id) {
       navigate('/dashboard');
       return;
     }
 
-    // Gera ou usa o link público existente
-    const link = chatbot.publicLink || generatePublicLink(chatbot.id);
-    setPublicLink(`https://${link}`);
-    
-    // Gera QR Code (usando API pública)
-    const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`https://${link}`)}`;
-    setQrCodeUrl(qrApi);
-  }, [chatbot, generatePublicLink, navigate]);
+    const foundChatbot = getChatbot(id);
+    if (!foundChatbot) {
+      navigate('/dashboard');
+      return;
+    }
+
+    setChatbot(foundChatbot);
+
+    // Use the existing public link from the chatbot
+    if (foundChatbot.publicLink) {
+      const fullUrl = `https://${foundChatbot.publicLink}.nylo.app`;
+      setPublicLink(fullUrl);
+      
+      // Generate QR Code
+      const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(fullUrl)}`;
+      setQrCodeUrl(qrApi);
+    } else {
+      // If no public link exists, this means the chatbot was created before the trigger
+      const fallbackUrl = `https://${foundChatbot.name.toLowerCase().replace(/\s+/g, '-')}-${foundChatbot.id}.nylo.app`;
+      setPublicLink(fallbackUrl);
+      
+      const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(fallbackUrl)}`;
+      setQrCodeUrl(qrApi);
+    }
+  }, [id, getChatbot, navigate]);
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -55,7 +72,11 @@ const Share = () => {
   };
 
   if (!chatbot) {
-    return <div>Carregando...</div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-nylo-dark via-nylo-darker to-nylo-card flex items-center justify-center">
+        <div className="text-white">Carregando...</div>
+      </div>
+    );
   }
 
   return (
