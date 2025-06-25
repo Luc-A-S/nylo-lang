@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -89,7 +90,11 @@ export function SupabaseNyloProvider({ children }: { children: React.ReactNode }
             ? JSON.parse(bot.settings) 
             : bot.settings || {};
         } catch (e) {
-          settings = {};
+          settings = {
+            brandingColor: '#356CFF',
+            businessName: bot.name,
+            welcomeMessage: 'Olá! Como posso ajudar você hoje?'
+          };
         }
 
         // Garantir configurações padrão
@@ -197,7 +202,7 @@ fluxo suporte:
 
 fim`;
 
-    const defaultSettings = {
+    const defaultSettings: ChatbotSettings = {
       brandingColor: '#356CFF',
       businessName: name,
       welcomeMessage: 'Olá! Como posso ajudar você hoje?'
@@ -254,7 +259,7 @@ fim`;
 
     console.log('SupabaseNyloContext: Creating chatbot from template', { template: template.id, name, description, userId: user.id });
 
-    const defaultSettings = {
+    const defaultSettings: ChatbotSettings = {
       brandingColor: '#356CFF',
       businessName: name,
       welcomeMessage: 'Olá! Como posso ajudar você hoje?'
