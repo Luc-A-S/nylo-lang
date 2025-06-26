@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -212,7 +211,7 @@ fim`;
           name,
           description,
           nylo_code: defaultSourceCode,
-          settings: defaultSettings,
+          settings: defaultSettings as any, // Cast to any to satisfy Json type
           is_online: false,
         })
         .select()
@@ -271,7 +270,7 @@ fim`;
           name,
           description,
           nylo_code: template.sourceCode,
-          settings: defaultSettings,
+          settings: defaultSettings as any, // Cast to any to satisfy Json type
           is_online: false,
         })
         .select()
@@ -326,7 +325,7 @@ fim`;
     if (updates.description !== undefined) updateData.description = updates.description;
     if (updates.sourceCode !== undefined) updateData.nylo_code = updates.sourceCode;
     if (updates.isOnline !== undefined) updateData.is_online = updates.isOnline;
-    if (updates.settings !== undefined) updateData.settings = updates.settings;
+    if (updates.settings !== undefined) updateData.settings = updates.settings as any; // Cast to any to satisfy Json type
 
     try {
       const { data, error } = await supabase
