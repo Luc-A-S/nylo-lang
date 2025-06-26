@@ -1,10 +1,11 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { templates, getTemplatesByCategory, Template } from '@/data/templates';
 import { ShoppingBag, Building2, HelpCircle, Eye } from 'lucide-react';
-import { useSupabaseNylo } from '@/contexts/SupabaseNyloContext';
+import { useNylo } from '@/contexts/NyloContext';
 import { useNavigate } from 'react-router-dom';
 
 interface TemplateSelectorProps {
@@ -32,13 +33,13 @@ const categoryColors = {
 export const TemplateSelector = ({ onClose }: TemplateSelectorProps) => {
   const [selectedCategory, setSelectedCategory] = useState<'ecommerce' | 'empresa' | 'faq' | null>(null);
   const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
-  const { createChatbotFromTemplate } = useSupabaseNylo();
+  const { createChatbotFromTemplate } = useNylo();
   const navigate = useNavigate();
 
   const categories = ['ecommerce', 'empresa', 'faq'] as const;
 
-  const handleSelectTemplate = async (template: Template) => {
-    const newBot = await createChatbotFromTemplate(template, template.name);
+  const handleSelectTemplate = (template: Template) => {
+    const newBot = createChatbotFromTemplate(template);
     onClose();
     navigate(`/editor/${newBot.id}`);
   };
