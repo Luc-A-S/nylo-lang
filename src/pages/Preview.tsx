@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSupabaseNylo } from '@/contexts/SupabaseNyloContext';
 import { Button } from '@/components/ui/button';
@@ -6,6 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { RefreshCw, Share, Bot, Settings, Maximize2, Minimize2 } from 'lucide-react';
+import { OptimizedChatMessage } from '@/components/OptimizedChatMessage';
+import { useVirtualizedMessages } from '@/hooks/useVirtualizedMessages';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface ChatMessage {
   id: string;
@@ -35,32 +39,20 @@ const Preview = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Usar debounce para input do usuário
+  const debouncedUserInput = useDebounce(userInput, 300);
+
+  // Virtualizar mensagens para melhor performance
+  const { visibleMessages, hasMore, loadMore } = useVirtualizedMessages(messages);
+
   console.log('Preview: Component initialized', { id, chatbot: !!chatbot });
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  }, []);
 
-  useEffect(() => {
-    console.log('Preview: useEffect triggered', { id, chatbot: !!chatbot });
-    
-    if (!chatbot) {
-      console.log('Preview: Chatbot not found, redirecting to dashboard');
-      navigate('/dashboard');
-      return;
-    }
-
-    // Parse do código NyloLang
-    const flows = parseNyloCode(chatbot.sourceCode);
-    setParsedFlows(flows);
-    
-    // Inicia o chat
-    if (flows.inicio) {
-      addBotMessage(flows.inicio.message, flows.inicio.buttons);
-    }
-  }, [chatbot, navigate]);
-
-  const parseNyloCode = (code: string): ParsedFlow => {
+  // Memoizar parsing do código para evitar re-processamento
+  const parseNyloCode = useCallback((code: string): ParsedFlow => {
     const flows: ParsedFlow = {};
     const lines = code.split('\n').map(line => line.trim()).filter(line => line && !line.startsWith('#'));
     
@@ -121,30 +113,49 @@ const Preview = () => {
     }
 
     return flows;
-  };
+  }, []);
 
-  const addBotMessage = (text: string, buttons?: { text: string; action: string }[]) => {
+  useEffect(() => {
+    console.log('Preview: useEffect triggered', { id, chatbot: !!chatbot });
+    
+    if (!chatbot) {
+      console.log('Preview: Chatbot not found, redirecting to dashboard');
+      navigate('/dashboard');
+      return;
+    }
+
+    // Parse do código NyloLang
+    const flows = parseNyloCode(chatbot.sourceCode);
+    setParsedFlows(flows);
+    
+    // Inicia o chat
+    if (flows.inicio) {
+      addBotMessage(flows.inicio.message, flows.inicio.buttons);
+    }
+  }, [chatbot, navigate, parseNyloCode]);
+
+  const addBotMessage = useCallback((text: string, buttons?: { text: string; action: string }[]) => {
     const newMessage: ChatMessage = {
-      id: Date.now().toString(),
+      id: `bot-${Date.now()}-${Math.random()}`,
       text,
       isBot: true,
       buttons,
       timestamp: new Date()
     };
     setMessages(prev => [...prev, newMessage]);
-  };
+  }, []);
 
-  const addUserMessage = (text: string) => {
+  const addUserMessage = useCallback((text: string) => {
     const newMessage: ChatMessage = {
-      id: Date.now().toString(),
+      id: `user-${Date.now()}-${Math.random()}`,
       text,
       isBot: false,
       timestamp: new Date()
     };
     setMessages(prev => [...prev, newMessage]);
-  };
+  }, []);
 
-  const handleButtonClick = (action: string) => {
+  const handleButtonClick = useCallback((action: string) => {
     if (action === 'atendimento_humano') {
       addBotMessage("Perfeito! Para conectar você com um atendente, preciso do seu nome:");
       setIsWaitingForName(true);
@@ -158,9 +169,9 @@ const Preview = () => {
     } else {
       addBotMessage("Desculpe, não consegui processar sua solicitação.");
     }
-  };
+  }, [parsedFlows, addBotMessage]);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = useCallback(() => {
     if (!userInput.trim()) return;
 
     addUserMessage(userInput);
@@ -171,22 +182,27 @@ const Preview = () => {
     }
 
     setUserInput('');
-  };
+  }, [userInput, isWaitingForName, addUserMessage, addBotMessage]);
 
-  const handleGenerateLink = () => {
+  const handleGenerateLink = useCallback(() => {
     if (!chatbot) return;
     const link = generatePublicLink(chatbot.id);
     navigate(`/share/${chatbot.id}`);
-  };
+  }, [chatbot, generatePublicLink, navigate]);
 
-  const handleRestart = () => {
+  const handleRestart = useCallback(() => {
     setMessages([]);
     setCurrentFlow('inicio');
     setIsWaitingForName(false);
     if (parsedFlows.inicio) {
       addBotMessage(parsedFlows.inicio.message, parsedFlows.inicio.buttons);
     }
-  };
+  }, [parsedFlows, addBotMessage]);
+
+  // Auto-scroll quando novas mensagens chegam
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages.length, scrollToBottom]);
 
   if (!chatbot) {
     return (
@@ -296,46 +312,23 @@ const Preview = () => {
               scrollbarColor: `${chatbot.settings?.brandingColor || '#356CFF'}30 transparent`
             }}
           >
-            {messages.map((message, index) => (
-              <div
-                key={message.id}
-                className={`flex ${message.isBot ? 'justify-start' : 'justify-end'} animate-fade-in`}
-                style={{ animationDelay: `${index * 0.1}s` }}
+            {hasMore && (
+              <Button
+                variant="ghost"
+                onClick={loadMore}
+                className="w-full text-gray-400 hover:text-white"
               >
-                <div
-                  className={`max-w-[85%] sm:max-w-xs lg:max-w-md px-3 md:px-4 py-2 md:py-3 rounded-2xl transition-all duration-300 hover:scale-[1.02] ${
-                    message.isBot
-                      ? 'bg-gradient-to-r from-gray-700 to-gray-600 text-white shadow-lg'
-                      : 'text-white shadow-lg'
-                  }`}
-                  style={!message.isBot ? {
-                    background: `linear-gradient(135deg, ${chatbot.settings?.brandingColor || '#356CFF'}, ${chatbot.settings?.brandingColor || '#356CFF'}dd)`
-                  } : {}}
-                >
-                  <p className="text-xs md:text-sm whitespace-pre-line leading-relaxed">{message.text}</p>
-                  {message.buttons && (
-                    <div className="mt-2 md:mt-3 space-y-1 md:space-y-2">
-                      {message.buttons.map((button, buttonIndex) => (
-                        <Button
-                          key={buttonIndex}
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleButtonClick(button.action)}
-                          className="w-full text-left border-primary/20 text-primary hover:bg-primary hover:text-white transition-all duration-300 hover:scale-105 text-xs md:text-sm h-8 md:h-auto"
-                        >
-                          {button.text}
-                        </Button>
-                      ))}
-                    </div>
-                  )}
-                  <p className="text-xs text-gray-400 mt-1 md:mt-2 opacity-70">
-                    {message.timestamp.toLocaleTimeString('pt-BR', { 
-                      hour: '2-digit', 
-                      minute: '2-digit' 
-                    })}
-                  </p>
-                </div>
-              </div>
+                Carregar mensagens anteriores
+              </Button>
+            )}
+            {visibleMessages.map((message, index) => (
+              <OptimizedChatMessage
+                key={message.id}
+                message={message}
+                index={index}
+                brandingColor={chatbot.settings?.brandingColor}
+                onButtonClick={handleButtonClick}
+              />
             ))}
             <div ref={messagesEndRef} />
           </div>

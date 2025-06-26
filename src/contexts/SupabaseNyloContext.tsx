@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { Chatbot, Template } from '@/types/chatbot';
-import { useChatbotData } from '@/hooks/useChatbotData';
+import { useOptimizedChatbotData } from '@/hooks/useOptimizedChatbotData';
 import { useChatbotOperations } from '@/hooks/useChatbotOperations';
 
 interface SupabaseNyloContextType {
@@ -16,7 +16,7 @@ interface SupabaseNyloContextType {
   getChatbot: (id: string) => Chatbot | null;
   updateChatbot: (id: string, updates: Partial<Chatbot>) => Promise<void>;
   deleteChatbot: (id: string) => Promise<void>;
-  refreshChatbots: () => Promise<void>;
+  refreshChatbots: (force?: boolean) => void;
   generatePublicLink: (id: string) => string;
 }
 
@@ -25,9 +25,10 @@ const SupabaseNyloContext = createContext<SupabaseNyloContextType | undefined>(u
 export function SupabaseNyloProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
 
-  const { chatbots, setChatbots, refreshChatbots } = useChatbotData(user, session);
+  // Usar hook otimizado
+  const { chatbots, setChatbots, refreshChatbots, loading: chatbotsLoading } = useOptimizedChatbotData(user, session);
   const { createChatbot, createChatbotFromTemplate, updateChatbot, deleteChatbot } = useChatbotOperations(user, setChatbots);
 
   useEffect(() => {
@@ -45,9 +46,10 @@ export function SupabaseNyloProvider({ children }: { children: React.ReactNode }
       
       if (session?.user) {
         console.log('SupabaseNyloContext: Initial session found, refreshing chatbots');
-        refreshChatbots();
+        // Usar timeout para evitar chamadas simultâneas
+        setTimeout(() => refreshChatbots(true), 100);
       }
-      setLoading(false);
+      setAuthLoading(false);
     });
 
     // Set up auth state listener
@@ -63,12 +65,12 @@ export function SupabaseNyloProvider({ children }: { children: React.ReactNode }
       
       if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
         console.log('SupabaseNyloContext: User signed in, refreshing chatbots');
-        refreshChatbots();
+        setTimeout(() => refreshChatbots(true), 100);
       } else if (event === 'SIGNED_OUT') {
         console.log('SupabaseNyloContext: User signed out, clearing chatbots');
         setChatbots([]);
       }
-      setLoading(false);
+      setAuthLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -88,7 +90,7 @@ export function SupabaseNyloProvider({ children }: { children: React.ReactNode }
     user,
     session,
     chatbots,
-    loading,
+    loading: authLoading || chatbotsLoading,
     createChatbot,
     createChatbotFromTemplate,
     getChatbot,
@@ -102,7 +104,7 @@ export function SupabaseNyloProvider({ children }: { children: React.ReactNode }
     user: !!user, 
     session: !!session, 
     chatbots: chatbots.length, 
-    loading 
+    loading: authLoading || chatbotsLoading
   });
 
   return (
