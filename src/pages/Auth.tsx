@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSupabaseNylo } from '@/contexts/SupabaseNyloContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { loading } = useSupabaseNylo();
+  const { user, loading } = useSupabaseNylo();
   const [isLoading, setIsLoading] = useState(false);
   const [currentView, setCurrentView] = useState<'login' | 'register'>('login');
   const [showPassword, setShowPassword] = useState(false);
@@ -23,6 +23,15 @@ const Auth = () => {
     confirmPassword: ''
   });
 
+  // Redirect authenticated users immediately
+  useEffect(() => {
+    console.log('Auth: Effect triggered', { user: !!user, loading });
+    if (!loading && user) {
+      console.log('Auth: User is authenticated, redirecting to dashboard');
+      navigate('/dashboard', { replace: true });
+    }
+  }, [user, loading, navigate]);
+
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -33,22 +42,25 @@ const Auth = () => {
       return;
     }
 
+    console.log('Auth: Starting login process');
     setIsLoading(true);
+    
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
       });
 
       if (error) {
-        console.error('Login error:', error);
+        console.error('Auth: Login error:', error);
         toast.error(error.message || 'Erro ao fazer login');
       } else {
+        console.log('Auth: Login successful', { user: !!data.user });
         toast.success('Login realizado com sucesso!');
-        navigate('/dashboard');
+        // Navigation will be handled by useEffect when user state updates
       }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Auth: Login exception:', error);
       toast.error('Erro inesperado ao fazer login');
     } finally {
       setIsLoading(false);
@@ -71,9 +83,11 @@ const Auth = () => {
       return;
     }
 
+    console.log('Auth: Starting registration process');
     setIsLoading(true);
+    
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
@@ -85,24 +99,41 @@ const Auth = () => {
       });
 
       if (error) {
-        console.error('Register error:', error);
+        console.error('Auth: Register error:', error);
         toast.error(error.message || 'Erro ao criar conta');
       } else {
+        console.log('Auth: Registration successful', { user: !!data.user });
         toast.success('Conta criada com sucesso! Verifique seu email para confirmar.');
-        navigate('/dashboard');
+        // Navigation will be handled by useEffect when user state updates
       }
     } catch (error) {
-      console.error('Register error:', error);
+      console.error('Auth: Register exception:', error);
       toast.error('Erro inesperado ao criar conta');
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Show loading while auth state is being determined
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-nylo-dark via-nylo-darker to-nylo-card flex items-center justify-center">
-        <div className="text-white">Carregando...</div>
+        <div className="text-white text-center">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p>Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render auth form if user is already logged in
+  if (user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-nylo-dark via-nylo-darker to-nylo-card flex items-center justify-center">
+        <div className="text-white text-center">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p>Redirecionando...</p>
+        </div>
       </div>
     );
   }

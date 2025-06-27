@@ -46,11 +46,24 @@ export function SupabaseNyloProvider({ children }: { children: React.ReactNode }
     console.log('SupabaseNyloContext: Setting up auth state listener');
     
     let mounted = true;
+    let isInitialized = false;
 
     const initializeAuth = async () => {
       try {
+        console.log('SupabaseNyloContext: Starting auth initialization');
         setLoading(true);
-        const { data: { session } } = await supabase.auth.getSession();
+        
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('SupabaseNyloContext: Error getting session:', error);
+          if (mounted) {
+            setSession(null);
+            setUser(null);
+            setLoading(false);
+          }
+          return;
+        }
         
         if (!mounted) return;
         
@@ -61,13 +74,25 @@ export function SupabaseNyloProvider({ children }: { children: React.ReactNode }
         
         setSession(session);
         setUser(session?.user ?? null);
+        isInitialized = true;
         
+        // Defer chatbot refresh to avoid blocking auth
         if (session?.user) {
-          console.log('SupabaseNyloContext: User found, refreshing chatbots');
-          await refreshChatbots();
+          console.log('SupabaseNyloContext: User found, deferring chatbots refresh');
+          setTimeout(() => {
+            if (mounted) {
+              refreshChatbots().catch(error => {
+                console.error('SupabaseNyloContext: Deferred chatbot refresh failed:', error);
+              });
+            }
+          }, 100);
         }
       } catch (error) {
-        console.error('SupabaseNyloContext: Error getting initial session:', error);
+        console.error('SupabaseNyloContext: Error in auth initialization:', error);
+        if (mounted) {
+          setSession(null);
+          setUser(null);
+        }
       } finally {
         if (mounted) {
           setLoading(false);
@@ -75,43 +100,52 @@ export function SupabaseNyloProvider({ children }: { children: React.ReactNode }
       }
     };
 
-    initializeAuth();
-
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    // Set up auth state listener FIRST - critical to avoid deadlock
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (!mounted) return;
       
       console.log('SupabaseNyloContext: Auth state changed', { 
         event, 
         session: !!session, 
-        user: !!session?.user 
+        user: !!session?.user,
+        isInitialized 
       });
       
+      // Only synchronous state updates here - NO async calls to prevent deadlock
       setSession(session);
       setUser(session?.user ?? null);
       
-      if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
-        console.log('SupabaseNyloContext: User signed in, refreshing chatbots');
-        try {
-          await refreshChatbots();
-        } catch (error) {
-          console.error('SupabaseNyloContext: Error refreshing chatbots:', error);
+      // Defer any async operations to prevent auth loop
+      if (isInitialized) {
+        if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
+          console.log('SupabaseNyloContext: User signed in, deferring chatbots refresh');
+          setTimeout(() => {
+            if (mounted) {
+              refreshChatbots().catch(error => {
+                console.error('SupabaseNyloContext: Deferred refresh failed:', error);
+              });
+            }
+          }, 0);
+        } else if (event === 'SIGNED_OUT') {
+          console.log('SupabaseNyloContext: User signed out, clearing chatbots');
+          setChatbots([]);
         }
-      } else if (event === 'SIGNED_OUT') {
-        console.log('SupabaseNyloContext: User signed out, clearing chatbots');
-        setChatbots([]);
-      }
-      
-      if (event !== 'TOKEN_REFRESHED') {
-        setLoading(false);
+        
+        if (event !== 'TOKEN_REFRESHED') {
+          setLoading(false);
+        }
       }
     });
 
+    // THEN initialize auth
+    initializeAuth();
+
     return () => {
+      console.log('SupabaseNyloContext: Cleaning up auth listener');
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [refreshChatbots, setChatbots]);
+  }, []); // Remove dependencies to prevent recreation
 
   const contextValue = {
     user,

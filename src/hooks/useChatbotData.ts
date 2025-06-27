@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -9,7 +9,7 @@ import { transformSupabaseChatbot } from '@/utils/chatbotTransformers';
 export const useChatbotData = (user: User | null, session: Session | null) => {
   const [chatbots, setChatbots] = useState<Chatbot[]>([]);
 
-  const refreshChatbots = async () => {
+  const refreshChatbots = useCallback(async () => {
     const currentUser = user || session?.user;
     
     console.log('useChatbotData: refreshChatbots called', { 
@@ -48,17 +48,6 @@ export const useChatbotData = (user: User | null, session: Session | null) => {
     } catch (error) {
       console.error('useChatbotData: Error refreshing chatbots:', error);
       toast.error('Erro inesperado ao carregar chatbots');
-    }
-  };
-
-  // Auto-refresh when user changes
-  useEffect(() => {
-    if (user || session?.user) {
-      console.log('useChatbotData: User changed, refreshing chatbots');
-      refreshChatbots();
-    } else {
-      console.log('useChatbotData: No user, clearing chatbots');
-      setChatbots([]);
     }
   }, [user?.id, session?.user?.id]);
 
