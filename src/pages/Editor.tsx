@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSupabaseNylo } from '@/contexts/SupabaseNyloContext';
 import { Button } from '@/components/ui/button';
@@ -15,11 +15,19 @@ const Editor = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { getChatbot, updateChatbot } = useSupabaseNylo();
-  const [chatbot, setChatbot] = useState(getChatbot(id || ''));
-  const [sourceCode, setSourceCode] = useState(chatbot?.sourceCode || '');
+  const [sourceCode, setSourceCode] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isTogglingStatus, setIsTogglingStatus] = useState(false);
 
-  console.log('Editor: Component initialized', { id, chatbot: !!chatbot });
+  console.log('Editor: Component initialized', { id });
+
+  // Memoize chatbot to prevent unnecessary lookups
+  const chatbot = useMemo(() => {
+    if (!id) return null;
+    return getChatbot(id);
+  }, [id, getChatbot]);
 
   useEffect(() => {
     console.log('Editor: useEffect triggered', { id, chatbot: !!chatbot });
@@ -30,23 +38,21 @@ const Editor = () => {
       return;
     }
 
-    const foundChatbot = getChatbot(id);
-    console.log('Editor: Found chatbot', { id, foundChatbot: !!foundChatbot });
-    
-    if (!foundChatbot) {
+    if (!chatbot) {
       console.log('Editor: Chatbot not found, redirecting to dashboard');
       navigate('/dashboard');
       return;
     }
     
-    setChatbot(foundChatbot);
-    setSourceCode(foundChatbot.sourceCode);
-  }, [id, getChatbot, navigate]);
+    setSourceCode(chatbot.sourceCode);
+    setIsLoading(false);
+  }, [id, chatbot, navigate]);
 
-  const handleSave = async () => {
-    if (!chatbot) return;
+  const handleSave = useCallback(async () => {
+    if (!chatbot || isSaving) return;
     
     console.log('Editor: Saving chatbot', { id: chatbot.id, sourceCodeLength: sourceCode.length });
+    setIsSaving(true);
     
     try {
       await updateChatbot(chatbot.id, { sourceCode });
@@ -54,26 +60,30 @@ const Editor = () => {
     } catch (error) {
       console.error('Editor: Error saving chatbot:', error);
       toast.error('Erro ao salvar chatbot');
+    } finally {
+      setIsSaving(false);
     }
-  };
+  }, [chatbot, sourceCode, updateChatbot, isSaving]);
 
-  const handleToggleOnline = async () => {
-    if (!chatbot) return;
+  const handleToggleOnline = useCallback(async () => {
+    if (!chatbot || isTogglingStatus) return;
     
     const newStatus = !chatbot.isOnline;
     console.log('Editor: Toggling online status', { id: chatbot.id, newStatus });
+    setIsTogglingStatus(true);
     
     try {
       await updateChatbot(chatbot.id, { isOnline: newStatus });
-      setChatbot(prev => prev ? { ...prev, isOnline: newStatus } : null);
       toast.success(`Chatbot ${newStatus ? 'ativado' : 'desativado'}!`);
     } catch (error) {
       console.error('Editor: Error toggling online status:', error);
       toast.error('Erro ao alterar status do chatbot');
+    } finally {
+      setIsTogglingStatus(false);
     }
-  };
+  }, [chatbot, updateChatbot, isTogglingStatus]);
 
-  if (!chatbot) {
+  if (isLoading || !chatbot) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-nylo-dark via-nylo-darker to-nylo-card flex items-center justify-center">
         <div className="text-white">Carregando...</div>
@@ -121,12 +131,18 @@ const Editor = () => {
               <Button 
                 variant="outline" 
                 onClick={handleToggleOnline}
+                disabled={isTogglingStatus}
                 className={`text-xs md:text-sm px-2 md:px-4 h-8 md:h-10 ${chatbot.isOnline 
                   ? "border-red-400/30 text-red-400 hover:bg-red-400/10"
                   : "border-green-400/30 text-green-400 hover:bg-green-400/10"
                 }`}
               >
-                {chatbot.isOnline ? (
+                {isTogglingStatus ? (
+                  <>
+                    <div className="w-3 h-3 md:w-4 md:h-4 md:mr-2 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    <span className="hidden sm:inline">Processando</span>
+                  </>
+                ) : chatbot.isOnline ? (
                   <>
                     <PowerOff className="w-3 h-3 md:w-4 md:h-4 md:mr-2" />
                     <span className="hidden sm:inline">Desativar</span>
@@ -140,10 +156,20 @@ const Editor = () => {
               </Button>
               <Button 
                 onClick={handleSave}
+                disabled={isSaving}
                 className="gradient-blue hover:opacity-90 nylo-shadow text-xs md:text-sm px-2 md:px-4 h-8 md:h-10"
               >
-                <Save className="w-3 h-3 md:w-4 md:h-4 md:mr-2" />
-                <span className="hidden sm:inline">Salvar</span>
+                {isSaving ? (
+                  <>
+                    <div className="w-3 h-3 md:w-4 md:h-4 md:mr-2 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    <span className="hidden sm:inline">Salvando</span>
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-3 h-3 md:w-4 md:h-4 md:mr-2" />
+                    <span className="hidden sm:inline">Salvar</span>
+                  </>
+                )}
               </Button>
               <Button 
                 variant="ghost"

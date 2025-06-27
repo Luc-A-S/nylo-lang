@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSupabaseNylo } from '@/contexts/SupabaseNyloContext';
 import { Button } from '@/components/ui/button';
@@ -26,41 +27,61 @@ const Preview = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { getChatbot, generatePublicLink } = useSupabaseNylo();
-  const [chatbot] = useState(getChatbot(id || ''));
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [currentFlow, setCurrentFlow] = useState('inicio');
   const [isWaitingForName, setIsWaitingForName] = useState(false);
   const [userInput, setUserInput] = useState('');
-  const [parsedFlows, setParsedFlows] = useState<ParsedFlow>({});
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [chatbot, setChatbot] = useState(getChatbot(id || ''));
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   console.log('Preview: Component initialized', { id, chatbot: !!chatbot });
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  // Memoize parsed flows to avoid recalculating on every render
+  const parsedFlows = useMemo(() => {
+    if (!chatbot?.sourceCode) return {};
+    return parseNyloCode(chatbot.sourceCode);
+  }, [chatbot?.sourceCode]);
 
+  const scrollToBottom = useCallback(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, []);
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, scrollToBottom]);
+
+  // Initialize chatbot and chat
   useEffect(() => {
     console.log('Preview: useEffect triggered', { id, chatbot: !!chatbot });
     
-    if (!chatbot) {
+    if (!id) {
+      console.log('Preview: No ID provided, redirecting to dashboard');
+      navigate('/dashboard');
+      return;
+    }
+
+    const foundChatbot = getChatbot(id);
+    
+    if (!foundChatbot) {
       console.log('Preview: Chatbot not found, redirecting to dashboard');
       navigate('/dashboard');
       return;
     }
 
-    // Parse do código NyloLang
-    const flows = parseNyloCode(chatbot.sourceCode);
-    setParsedFlows(flows);
+    setChatbot(foundChatbot);
+    setIsLoading(false);
     
-    // Inicia o chat
-    if (flows.inicio) {
+    // Initialize chat with the first flow
+    const flows = parseNyloCode(foundChatbot.sourceCode);
+    if (flows.inicio && messages.length === 0) {
       addBotMessage(flows.inicio.message, flows.inicio.buttons);
     }
-  }, [chatbot, navigate]);
+  }, [id, getChatbot, navigate]); // Removed messages from dependencies to prevent loops
 
-  const parseNyloCode = (code: string): ParsedFlow => {
+  const parseNyloCode = useCallback((code: string): ParsedFlow => {
     const flows: ParsedFlow = {};
     const lines = code.split('\n').map(line => line.trim()).filter(line => line && !line.startsWith('#'));
     
@@ -72,7 +93,7 @@ const Preview = () => {
 
     for (const line of lines) {
       if (line.includes(':') && (line.startsWith('inicio') || line.startsWith('fluxo'))) {
-        // Salva o fluxo anterior se existir
+        // Save previous flow if exists
         if (currentFlowName && currentMessage) {
           flows[currentFlowName] = {
             message: currentMessage.trim(),
@@ -80,7 +101,7 @@ const Preview = () => {
           };
         }
         
-        // Inicia novo fluxo
+        // Start new flow
         currentFlowName = line.startsWith('inicio') ? 'inicio' : line.split(' ')[1].replace(':', '');
         currentMessage = '';
         currentButtons = [];
@@ -91,10 +112,6 @@ const Preview = () => {
         inButtons = false;
       } else if (line.startsWith('botao')) {
         inButtons = true;
-        const buttonMatch = line.match(/botao \d+:/);
-        if (buttonMatch) {
-          // Botão será processado na próxima linha
-        }
       } else if (line.startsWith('"') && line.endsWith('"')) {
         const text = line.slice(1, -1);
         if (inMessage) {
@@ -109,7 +126,7 @@ const Preview = () => {
           });
         }
       } else if (line === 'fim') {
-        // Salva o último fluxo
+        // Save last flow
         if (currentFlowName && currentMessage) {
           flows[currentFlowName] = {
             message: currentMessage.trim(),
@@ -121,9 +138,9 @@ const Preview = () => {
     }
 
     return flows;
-  };
+  }, []);
 
-  const addBotMessage = (text: string, buttons?: { text: string; action: string }[]) => {
+  const addBotMessage = useCallback((text: string, buttons?: { text: string; action: string }[]) => {
     const newMessage: ChatMessage = {
       id: Date.now().toString(),
       text,
@@ -132,9 +149,9 @@ const Preview = () => {
       timestamp: new Date()
     };
     setMessages(prev => [...prev, newMessage]);
-  };
+  }, []);
 
-  const addUserMessage = (text: string) => {
+  const addUserMessage = useCallback((text: string) => {
     const newMessage: ChatMessage = {
       id: Date.now().toString(),
       text,
@@ -142,9 +159,9 @@ const Preview = () => {
       timestamp: new Date()
     };
     setMessages(prev => [...prev, newMessage]);
-  };
+  }, []);
 
-  const handleButtonClick = (action: string) => {
+  const handleButtonClick = useCallback((action: string) => {
     if (action === 'atendimento_humano') {
       addBotMessage("Perfeito! Para conectar você com um atendente, preciso do seu nome:");
       setIsWaitingForName(true);
@@ -158,9 +175,9 @@ const Preview = () => {
     } else {
       addBotMessage("Desculpe, não consegui processar sua solicitação.");
     }
-  };
+  }, [parsedFlows, addBotMessage]);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = useCallback(() => {
     if (!userInput.trim()) return;
 
     addUserMessage(userInput);
@@ -171,24 +188,25 @@ const Preview = () => {
     }
 
     setUserInput('');
-  };
+  }, [userInput, isWaitingForName, addUserMessage, addBotMessage]);
 
-  const handleGenerateLink = () => {
+  const handleGenerateLink = useCallback(() => {
     if (!chatbot) return;
     const link = generatePublicLink(chatbot.id);
     navigate(`/share/${chatbot.id}`);
-  };
+  }, [chatbot, generatePublicLink, navigate]);
 
-  const handleRestart = () => {
+  const handleRestart = useCallback(() => {
     setMessages([]);
     setCurrentFlow('inicio');
     setIsWaitingForName(false);
+    setUserInput('');
     if (parsedFlows.inicio) {
       addBotMessage(parsedFlows.inicio.message, parsedFlows.inicio.buttons);
     }
-  };
+  }, [parsedFlows, addBotMessage]);
 
-  if (!chatbot) {
+  if (isLoading || !chatbot) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-nylo-dark via-nylo-darker to-nylo-card flex items-center justify-center">
         <div className="text-white">Carregando...</div>
