@@ -11,6 +11,7 @@ interface SupabaseNyloContextType {
   session: Session | null;
   chatbots: Chatbot[];
   loading: boolean;
+  initialized: boolean;
   createChatbot: (name: string, description?: string) => Promise<Chatbot>;
   createChatbotFromTemplate: (template: Template, name: string, description?: string) => Promise<Chatbot>;
   getChatbot: (id: string) => Chatbot | null;
@@ -26,132 +27,93 @@ export function SupabaseNyloProvider({ children }: { children: React.ReactNode }
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
 
   const { chatbots, setChatbots, refreshChatbots } = useChatbotData(user, session);
   const { createChatbot, createChatbotFromTemplate, updateChatbot, deleteChatbot } = useChatbotOperations(user, setChatbots);
 
-  // Memoize the getChatbot function to prevent unnecessary re-renders
+  // Memoize functions to prevent unnecessary re-renders
   const getChatbot = useCallback((id: string): Chatbot | null => {
     console.log('SupabaseNyloContext: getChatbot called', { id, chatbotsCount: chatbots.length });
     return chatbots.find(bot => bot.id === id) || null;
   }, [chatbots]);
 
-  // Memoize the generatePublicLink function to create internal links
   const generatePublicLink = useCallback((id: string): string => {
     console.log('SupabaseNyloContext: generatePublicLink called', { id });
     return `/chat/${id}`;
   }, []);
 
+  // Initialize auth state
   useEffect(() => {
-    console.log('SupabaseNyloContext: Setting up auth state listener');
-    
     let mounted = true;
-    let isInitialized = false;
+    
+    console.log('SupabaseNyloContext: Initializing auth state');
 
-    const initializeAuth = async () => {
+    const initAuth = async () => {
       try {
-        console.log('SupabaseNyloContext: Starting auth initialization');
-        setLoading(true);
-        
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
-          console.error('SupabaseNyloContext: Error getting session:', error);
-          if (mounted) {
-            setSession(null);
-            setUser(null);
-            setLoading(false);
-          }
-          return;
+          console.error('SupabaseNyloContext: Error getting initial session:', error);
         }
         
-        if (!mounted) return;
-        
-        console.log('SupabaseNyloContext: Initial session check', { 
-          session: !!session, 
-          user: !!session?.user 
-        });
-        
-        setSession(session);
-        setUser(session?.user ?? null);
-        isInitialized = true;
-        
-        // Defer chatbot refresh to avoid blocking auth
-        if (session?.user) {
-          console.log('SupabaseNyloContext: User found, deferring chatbots refresh');
-          setTimeout(() => {
-            if (mounted) {
-              refreshChatbots().catch(error => {
-                console.error('SupabaseNyloContext: Deferred chatbot refresh failed:', error);
-              });
-            }
-          }, 100);
+        if (mounted) {
+          console.log('SupabaseNyloContext: Setting initial session', { hasSession: !!session });
+          setSession(session);
+          setUser(session?.user ?? null);
+          setInitialized(true);
+          setLoading(false);
         }
       } catch (error) {
         console.error('SupabaseNyloContext: Error in auth initialization:', error);
         if (mounted) {
           setSession(null);
           setUser(null);
-        }
-      } finally {
-        if (mounted) {
+          setInitialized(true);
           setLoading(false);
         }
       }
     };
 
-    // Set up auth state listener FIRST - critical to avoid deadlock
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    // Set up auth listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
       
-      console.log('SupabaseNyloContext: Auth state changed', { 
-        event, 
-        session: !!session, 
-        user: !!session?.user,
-        isInitialized 
-      });
+      console.log('SupabaseNyloContext: Auth state changed', { event, hasSession: !!session });
       
-      // Only synchronous state updates here - NO async calls to prevent deadlock
       setSession(session);
       setUser(session?.user ?? null);
       
-      // Defer any async operations to prevent auth loop
-      if (isInitialized) {
-        if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
-          console.log('SupabaseNyloContext: User signed in, deferring chatbots refresh');
-          setTimeout(() => {
-            if (mounted) {
-              refreshChatbots().catch(error => {
-                console.error('SupabaseNyloContext: Deferred refresh failed:', error);
-              });
-            }
-          }, 0);
-        } else if (event === 'SIGNED_OUT') {
-          console.log('SupabaseNyloContext: User signed out, clearing chatbots');
-          setChatbots([]);
-        }
-        
-        if (event !== 'TOKEN_REFRESHED') {
-          setLoading(false);
-        }
+      if (initialized) {
+        setLoading(false);
       }
     });
 
-    // THEN initialize auth
-    initializeAuth();
+    // Initialize
+    initAuth();
 
     return () => {
-      console.log('SupabaseNyloContext: Cleaning up auth listener');
       mounted = false;
       subscription.unsubscribe();
     };
-  }, []); // Remove dependencies to prevent recreation
+  }, []); // Remove all dependencies to prevent recreation
+
+  // Load chatbots when user changes
+  useEffect(() => {
+    if (initialized && user && chatbots.length === 0) {
+      console.log('SupabaseNyloContext: Loading chatbots for authenticated user');
+      refreshChatbots().catch(error => {
+        console.error('SupabaseNyloContext: Failed to load chatbots:', error);
+      });
+    }
+  }, [user, initialized, chatbots.length, refreshChatbots]);
 
   const contextValue = {
     user,
     session,
     chatbots,
     loading,
+    initialized,
     createChatbot,
     createChatbotFromTemplate,
     getChatbot,
@@ -165,7 +127,8 @@ export function SupabaseNyloProvider({ children }: { children: React.ReactNode }
     user: !!user, 
     session: !!session, 
     chatbots: chatbots.length, 
-    loading 
+    loading,
+    initialized
   });
 
   return (

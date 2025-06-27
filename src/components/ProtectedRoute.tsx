@@ -8,20 +8,25 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, loading } = useSupabaseNylo();
+  const { user, loading, initialized } = useSupabaseNylo();
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('ProtectedRoute: Effect triggered', { user: !!user, loading });
+    console.log('ProtectedRoute: Effect triggered', { 
+      user: !!user, 
+      loading, 
+      initialized 
+    });
     
-    if (!loading && !user) {
+    // Only redirect if fully initialized and no user
+    if (initialized && !loading && !user) {
       console.log('ProtectedRoute: No user found, redirecting to auth');
       navigate('/auth', { replace: true });
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, initialized, navigate]);
 
-  // Show loading while determining auth state
-  if (loading) {
+  // Show loading while auth is being determined
+  if (!initialized || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-nylo-dark via-nylo-darker to-nylo-card flex items-center justify-center">
         <div className="text-white text-center">
@@ -32,7 +37,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
-  // Don't render protected content if no user
+  // Show loading if no user but not yet redirected
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-nylo-dark via-nylo-darker to-nylo-card flex items-center justify-center">

@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { user, loading } = useSupabaseNylo();
+  const { user, loading, initialized } = useSupabaseNylo();
   const [isLoading, setIsLoading] = useState(false);
   const [currentView, setCurrentView] = useState<'login' | 'register'>('login');
   const [showPassword, setShowPassword] = useState(false);
@@ -23,14 +23,19 @@ const Auth = () => {
     confirmPassword: ''
   });
 
-  // Redirect authenticated users immediately
+  // Redirect authenticated users
   useEffect(() => {
-    console.log('Auth: Effect triggered', { user: !!user, loading });
-    if (!loading && user) {
+    console.log('Auth: Effect triggered', { 
+      user: !!user, 
+      loading, 
+      initialized 
+    });
+    
+    if (initialized && !loading && user) {
       console.log('Auth: User is authenticated, redirecting to dashboard');
       navigate('/dashboard', { replace: true });
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, initialized, navigate]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -57,7 +62,7 @@ const Auth = () => {
       } else {
         console.log('Auth: Login successful', { user: !!data.user });
         toast.success('Login realizado com sucesso!');
-        // Navigation will be handled by useEffect when user state updates
+        // Navigation will be handled by useEffect
       }
     } catch (error) {
       console.error('Auth: Login exception:', error);
@@ -103,8 +108,11 @@ const Auth = () => {
         toast.error(error.message || 'Erro ao criar conta');
       } else {
         console.log('Auth: Registration successful', { user: !!data.user });
-        toast.success('Conta criada com sucesso! Verifique seu email para confirmar.');
-        // Navigation will be handled by useEffect when user state updates
+        if (data.user) {
+          toast.success('Conta criada com sucesso!');
+        } else {
+          toast.success('Conta criada! Verifique seu email para confirmar.');
+        }
       }
     } catch (error) {
       console.error('Auth: Register exception:', error);
@@ -115,7 +123,7 @@ const Auth = () => {
   };
 
   // Show loading while auth state is being determined
-  if (loading) {
+  if (!initialized || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-nylo-dark via-nylo-darker to-nylo-card flex items-center justify-center">
         <div className="text-white text-center">
@@ -126,7 +134,7 @@ const Auth = () => {
     );
   }
 
-  // Don't render auth form if user is already logged in
+  // Show redirect loading if user is already logged in
   if (user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-nylo-dark via-nylo-darker to-nylo-card flex items-center justify-center">
