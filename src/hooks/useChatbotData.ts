@@ -10,20 +10,21 @@ export const useChatbotData = (user: User | null, session: Session | null) => {
   const [chatbots, setChatbots] = useState<Chatbot[]>([]);
 
   const refreshChatbots = async () => {
-    console.log('SupabaseNyloContext: refreshChatbots called', { 
+    const currentUser = user || session?.user;
+    
+    console.log('useChatbotData: refreshChatbots called', { 
       user: !!user, 
       session: !!session,
-      userId: user?.id || session?.user?.id 
+      userId: currentUser?.id 
     });
     
-    const currentUser = user || session?.user;
     if (!currentUser) {
-      console.log('SupabaseNyloContext: No user found, skipping chatbot refresh');
+      console.log('useChatbotData: No user found, clearing chatbots');
       setChatbots([]);
       return;
     }
 
-    console.log('SupabaseNyloContext: Refreshing chatbots for user', currentUser.id);
+    console.log('useChatbotData: Refreshing chatbots for user', currentUser.id);
 
     try {
       const { data, error } = await supabase
@@ -33,22 +34,33 @@ export const useChatbotData = (user: User | null, session: Session | null) => {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('SupabaseNyloContext: Error fetching chatbots:', error);
+        console.error('useChatbotData: Error fetching chatbots:', error);
         toast.error('Erro ao carregar chatbots: ' + error.message);
         return;
       }
 
-      console.log('SupabaseNyloContext: Fetched chatbots:', data?.length || 0, data);
+      console.log('useChatbotData: Fetched chatbots:', data?.length || 0, data);
 
       const transformedChatbots: Chatbot[] = (data || []).map(transformSupabaseChatbot);
 
       setChatbots(transformedChatbots);
-      console.log('SupabaseNyloContext: Chatbots set in state:', transformedChatbots.length);
+      console.log('useChatbotData: Chatbots set in state:', transformedChatbots.length);
     } catch (error) {
-      console.error('SupabaseNyloContext: Error refreshing chatbots:', error);
+      console.error('useChatbotData: Error refreshing chatbots:', error);
       toast.error('Erro inesperado ao carregar chatbots');
     }
   };
+
+  // Auto-refresh when user changes
+  useEffect(() => {
+    if (user || session?.user) {
+      console.log('useChatbotData: User changed, refreshing chatbots');
+      refreshChatbots();
+    } else {
+      console.log('useChatbotData: No user, clearing chatbots');
+      setChatbots([]);
+    }
+  }, [user?.id, session?.user?.id]);
 
   return {
     chatbots,

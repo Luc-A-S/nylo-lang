@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSupabaseNylo } from '@/contexts/SupabaseNyloContext';
@@ -30,22 +29,13 @@ const Share = () => {
 
     setChatbot(foundChatbot);
 
-    // Use the existing public link from the chatbot
-    if (foundChatbot.publicLink) {
-      const fullUrl = `https://${foundChatbot.publicLink}.nylo.app`;
-      setPublicLink(fullUrl);
-      
-      // Generate QR Code
-      const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(fullUrl)}`;
-      setQrCodeUrl(qrApi);
-    } else {
-      // If no public link exists, this means the chatbot was created before the trigger
-      const fallbackUrl = `https://${foundChatbot.name.toLowerCase().replace(/\s+/g, '-')}-${foundChatbot.id}.nylo.app`;
-      setPublicLink(fallbackUrl);
-      
-      const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(fallbackUrl)}`;
-      setQrCodeUrl(qrApi);
-    }
+    // Create internal link
+    const internalUrl = `${window.location.origin}/chat/${foundChatbot.id}`;
+    setPublicLink(internalUrl);
+    
+    // Generate QR Code
+    const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(internalUrl)}`;
+    setQrCodeUrl(qrApi);
   }, [id, getChatbot, navigate]);
 
   const copyToClipboard = async (text: string) => {
@@ -187,7 +177,7 @@ const Share = () => {
                   className="flex-1 glass-effect border-white/20 text-white hover:bg-white/10 text-sm"
                 >
                   <ExternalLink className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:inline">Abrir em Nova Guia</span>
+                  <span className="hidden sm:inline">Abrir Chatbot</span>
                   <span className="sm:hidden">Abrir</span>
                 </Button>
                 <Button

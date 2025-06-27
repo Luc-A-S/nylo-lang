@@ -14,6 +14,7 @@ import Preview from "./pages/Preview";
 import Share from "./pages/Share";
 import Learn from "./pages/Learn";
 import Settings from "./pages/Settings";
+import Chat from "./pages/Chat";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -53,6 +54,7 @@ const App = () => (
                 <Share />
               </ProtectedRoute>
             } />
+            <Route path="/chat/:id" element={<Chat />} />
             <Route path="/learn" element={<Learn />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

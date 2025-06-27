@@ -11,7 +11,7 @@ export const useChatbotOperations = (user: User | null, setChatbots: React.Dispa
 
   const createChatbot = async (name: string, description?: string): Promise<Chatbot> => {
     if (!user) {
-      console.error('SupabaseNyloContext: User not authenticated for createChatbot');
+      console.error('useChatbotOperations: User not authenticated for createChatbot');
       throw new Error('User not authenticated');
     }
 
@@ -19,7 +19,7 @@ export const useChatbotOperations = (user: User | null, setChatbots: React.Dispa
       throw new Error('Operation already in progress');
     }
 
-    console.log('SupabaseNyloContext: Creating chatbot', { name, description, userId: user.id });
+    console.log('useChatbotOperations: Creating chatbot', { name, description, userId: user.id });
     setIsOperating(true);
 
     const defaultSettings = createDefaultSettings(name);
@@ -39,12 +39,12 @@ export const useChatbotOperations = (user: User | null, setChatbots: React.Dispa
         .single();
 
       if (error) {
-        console.error('SupabaseNyloContext: Error creating chatbot:', error);
+        console.error('useChatbotOperations: Error creating chatbot:', error);
         toast.error('Erro ao criar chatbot: ' + error.message);
         throw error;
       }
 
-      console.log('SupabaseNyloContext: Chatbot created successfully', data);
+      console.log('useChatbotOperations: Chatbot created successfully', data);
 
       const newChatbot: Chatbot = {
         id: data.id,
@@ -64,7 +64,7 @@ export const useChatbotOperations = (user: User | null, setChatbots: React.Dispa
       toast.success('Chatbot criado com sucesso!');
       return newChatbot;
     } catch (error) {
-      console.error('SupabaseNyloContext: Create chatbot failed:', error);
+      console.error('useChatbotOperations: Create chatbot failed:', error);
       throw error;
     } finally {
       setIsOperating(false);
@@ -73,7 +73,7 @@ export const useChatbotOperations = (user: User | null, setChatbots: React.Dispa
 
   const createChatbotFromTemplate = async (template: Template, name: string, description?: string): Promise<Chatbot> => {
     if (!user) {
-      console.error('SupabaseNyloContext: User not authenticated for createChatbotFromTemplate');
+      console.error('useChatbotOperations: User not authenticated for createChatbotFromTemplate');
       throw new Error('User not authenticated');
     }
 
@@ -81,7 +81,7 @@ export const useChatbotOperations = (user: User | null, setChatbots: React.Dispa
       throw new Error('Operation already in progress');
     }
 
-    console.log('SupabaseNyloContext: Creating chatbot from template', { template: template.id, name, description, userId: user.id });
+    console.log('useChatbotOperations: Creating chatbot from template', { template: template.id, name, description, userId: user.id });
     setIsOperating(true);
 
     const defaultSettings = createDefaultSettings(name);
@@ -101,12 +101,12 @@ export const useChatbotOperations = (user: User | null, setChatbots: React.Dispa
         .single();
 
       if (error) {
-        console.error('SupabaseNyloContext: Error creating chatbot from template:', error);
+        console.error('useChatbotOperations: Error creating chatbot from template:', error);
         toast.error('Erro ao criar chatbot do template: ' + error.message);
         throw error;
       }
 
-      console.log('SupabaseNyloContext: Chatbot created from template successfully', data);
+      console.log('useChatbotOperations: Chatbot created from template successfully', data);
 
       const newChatbot: Chatbot = {
         id: data.id,
@@ -126,7 +126,7 @@ export const useChatbotOperations = (user: User | null, setChatbots: React.Dispa
       toast.success('Chatbot criado com sucesso!');
       return newChatbot;
     } catch (error) {
-      console.error('SupabaseNyloContext: Create chatbot from template failed:', error);
+      console.error('useChatbotOperations: Create chatbot from template failed:', error);
       throw error;
     } finally {
       setIsOperating(false);
@@ -135,7 +135,7 @@ export const useChatbotOperations = (user: User | null, setChatbots: React.Dispa
 
   const updateChatbot = async (id: string, updates: Partial<Chatbot>): Promise<void> => {
     if (!user) {
-      console.error('SupabaseNyloContext: User not authenticated for updateChatbot');
+      console.error('useChatbotOperations: User not authenticated for updateChatbot');
       throw new Error('User not authenticated');
     }
 
@@ -143,7 +143,7 @@ export const useChatbotOperations = (user: User | null, setChatbots: React.Dispa
       throw new Error('Operation already in progress');
     }
 
-    console.log('SupabaseNyloContext: Updating chatbot', { id, updates });
+    console.log('useChatbotOperations: Updating chatbot', { id, updates, userId: user.id });
     setIsOperating(true);
 
     const updateData: any = {};
@@ -164,12 +164,12 @@ export const useChatbotOperations = (user: User | null, setChatbots: React.Dispa
         .single();
 
       if (error) {
-        console.error('SupabaseNyloContext: Error updating chatbot:', error);
+        console.error('useChatbotOperations: Error updating chatbot:', error);
         toast.error('Erro ao atualizar chatbot: ' + error.message);
         throw error;
       }
 
-      console.log('SupabaseNyloContext: Chatbot updated successfully', data);
+      console.log('useChatbotOperations: Chatbot updated successfully', data);
 
       setChatbots(prev => prev.map(bot => {
         if (bot.id === id) {
@@ -185,7 +185,7 @@ export const useChatbotOperations = (user: User | null, setChatbots: React.Dispa
 
       toast.success('Chatbot atualizado com sucesso!');
     } catch (error) {
-      console.error('SupabaseNyloContext: Update chatbot failed:', error);
+      console.error('useChatbotOperations: Update chatbot failed:', error);
       throw error;
     } finally {
       setIsOperating(false);
@@ -194,7 +194,7 @@ export const useChatbotOperations = (user: User | null, setChatbots: React.Dispa
 
   const deleteChatbot = async (id: string): Promise<void> => {
     if (!user) {
-      console.error('SupabaseNyloContext: User not authenticated for deleteChatbot');
+      console.error('useChatbotOperations: User not authenticated for deleteChatbot');
       throw new Error('User not authenticated');
     }
 
@@ -202,7 +202,7 @@ export const useChatbotOperations = (user: User | null, setChatbots: React.Dispa
       throw new Error('Operation already in progress');
     }
 
-    console.log('SupabaseNyloContext: Deleting chatbot', { id, userId: user.id });
+    console.log('useChatbotOperations: Deleting chatbot', { id, userId: user.id });
     setIsOperating(true);
 
     try {
@@ -213,17 +213,17 @@ export const useChatbotOperations = (user: User | null, setChatbots: React.Dispa
         .eq('user_id', user.id);
 
       if (error) {
-        console.error('SupabaseNyloContext: Error deleting chatbot:', error);
+        console.error('useChatbotOperations: Error deleting chatbot:', error);
         toast.error('Erro ao excluir chatbot: ' + error.message);
         throw error;
       }
 
-      console.log('SupabaseNyloContext: Chatbot deleted successfully');
+      console.log('useChatbotOperations: Chatbot deleted successfully');
 
       setChatbots(prev => prev.filter(bot => bot.id !== id));
       toast.success('Chatbot excluído com sucesso!');
     } catch (error) {
-      console.error('SupabaseNyloContext: Delete chatbot failed:', error);
+      console.error('useChatbotOperations: Delete chatbot failed:', error);
       throw error;
     } finally {
       setIsOperating(false);

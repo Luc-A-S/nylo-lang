@@ -32,15 +32,15 @@ export function SupabaseNyloProvider({ children }: { children: React.ReactNode }
 
   // Memoize the getChatbot function to prevent unnecessary re-renders
   const getChatbot = useCallback((id: string): Chatbot | null => {
+    console.log('SupabaseNyloContext: getChatbot called', { id, chatbotsCount: chatbots.length });
     return chatbots.find(bot => bot.id === id) || null;
   }, [chatbots]);
 
-  // Memoize the generatePublicLink function
+  // Memoize the generatePublicLink function to create internal links
   const generatePublicLink = useCallback((id: string): string => {
-    const chatbot = getChatbot(id);
-    if (!chatbot || !chatbot.publicLink) return '';
-    return chatbot.publicLink;
-  }, [getChatbot]);
+    console.log('SupabaseNyloContext: generatePublicLink called', { id });
+    return `/chat/${id}`;
+  }, []);
 
   useEffect(() => {
     console.log('SupabaseNyloContext: Setting up auth state listener');
@@ -49,6 +49,7 @@ export function SupabaseNyloProvider({ children }: { children: React.ReactNode }
 
     const initializeAuth = async () => {
       try {
+        setLoading(true);
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!mounted) return;
@@ -62,7 +63,7 @@ export function SupabaseNyloProvider({ children }: { children: React.ReactNode }
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          console.log('SupabaseNyloContext: Initial session found, refreshing chatbots');
+          console.log('SupabaseNyloContext: User found, refreshing chatbots');
           await refreshChatbots();
         }
       } catch (error) {
@@ -110,7 +111,7 @@ export function SupabaseNyloProvider({ children }: { children: React.ReactNode }
       mounted = false;
       subscription.unsubscribe();
     };
-  }, []); // Empty dependency array to prevent loops
+  }, [refreshChatbots, setChatbots]);
 
   const contextValue = {
     user,
