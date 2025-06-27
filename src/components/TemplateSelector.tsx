@@ -44,9 +44,9 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ onClose }) => {
 
   const getTemplateIcon = (category: string) => {
     switch (category) {
-      case 'atendimento':
+      case 'empresa':
         return <MessageSquare className="w-5 h-5" />;
-      case 'vendas':
+      case 'ecommerce':
         return <Zap className="w-5 h-5" />;
       default:
         return <Bot className="w-5 h-5" />;
@@ -123,9 +123,9 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ onClose }) => {
                   <Badge 
                     variant="outline" 
                     className={`capitalize ${
-                      template.category === 'atendimento' 
+                      template.category === 'empresa' 
                         ? 'text-green-400 border-green-400/30'
-                        : template.category === 'vendas'
+                        : template.category === 'ecommerce'
                         ? 'text-blue-400 border-blue-400/30'
                         : 'text-purple-400 border-purple-400/30'
                     }`}
